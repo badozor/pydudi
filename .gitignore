@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+R.sh
+.gitattributes
+.gitignore
+.Rprofile
