@@ -32,7 +32,7 @@ write.csv(deug$tab,file="deugtab.csv")
 see for example: https://www.kaggle.com/code/arnopub/pandas-pr-sentation-des-dataframe
 
 ```{python}
-# import numpy as np 
+import numpy as np 
 import pandas as pd
 deugtab = pd.read_csv('deugtab.csv')
 deugtab
@@ -176,14 +176,22 @@ import pandas as pd
 import numpy as np
 
 def pydudi(X,cw,lw,nf):
-  n = len(X)
-  p = len(X.columns)
-  D = np.diag(np.sqrt(lw[0]))
-  Q = np.diag(np.sqrt(cw[0]))
-  # XtDXQ
+  dim = X.shape
+  n = dim[0]
+  p = dim[1]
+  nf0 = nf-1
+  # n=len(X)
+  # p=len(X.columns)
+  D = np.diag(np.sqrt(lw))
+  Q = np.diag(np.sqrt(cw))
+  
+  # XtDXQ => problem  with Q !!!
+  
   XD = np.dot(X.T,D).T
   XD = np.dot(XD,Q)
   XtX = np.dot(XD.T,XD)
+  
+  
   # decomposition
   eigenvalues, eigenvectors = np.linalg.eig(XtX)
   index = np.argsort(eigenvalues)[::-1]
@@ -191,29 +199,45 @@ def pydudi(X,cw,lw,nf):
   # np.nonzero(eigenvalues)[0]
   
   eigenvalues=eigenvalues[index]
-  #eigenvectors=eigenvectors[[index]]
+  eigenvectors=eigenvectors[:,index]
   # results
   rank = len(np.nonzero(eigenvalues)[0])
-  C1 = eigenvectors
+  C1 = eigenvectors[:,0:nf]
   Li = np.dot(X, C1)
   
-  # need to adjust the weighting
-  L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues)))
-  Co = np.dot(C1,np.diag(np.sqrt(eigenvalues)))
+  # need to adjust the weighting (problem with sqrt)
+  L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues[0:nf])))
+  Co = np.dot(C1,np.diag(np.sqrt(eigenvalues[0:nf])))
   return eigenvalues,rank,Li,L1,Co,C1,nf;
 
 ###
+```
 
+
+```{python}
+import numpy as np 
+import pandas as pd
+deugtab = pd.read_csv('deugtab.csv')
+deugtab
+del deugtab['Unnamed: 0']
+deugtab
 X= deugtab - deugtab.mean()
 # Normalize
 X = X / X.std(ddof=0)
-lw = pd.DataFrame(np.repeat(1/len(X),len(X)))
-cw = pd.DataFrame(np.repeat(1,len(X.columns)))
+dim = X.shape
+n = dim[0]
+p = dim[1]
+# lw = pd.DataFrame(np.repeat(1/len(X),len(X)))[0]
+# cw = pd.DataFrame(np.repeat(1,len(X.columns)))[0]
+lw = pd.DataFrame(np.repeat(1/n,n))[0]
+cw = pd.DataFrame(np.repeat(1,p))[0]
 ted = pydudi(X,cw,lw,2)
 ```
 
 
+
 ```{r}
+library(reticulate)
 names(py$ted) <- c("eig","rank","li","l1","co","c1","nf")
 coordli <- py$ted$li
 par(mfrow=c(2,2))
@@ -239,4 +263,118 @@ s.corcircle(pca2$co,sub="R version")
 plot(py$ted$c1[,1],pca2$c1[,1],panel.first=c(grid()),xlab="Python (axis 1)",ylab="R (axis 1)",pch=19);abline(0,-1,col="red")
 plot(py$ted$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="Python (axis 2)",ylab="R (axis 2)",pch=19);abline(0,-1,col="red")
 ```
+
+# Test of pydudi with COA
+
+COA: correspondence analysis.
+
+     Benzécri, J.P. and Coll. (1973) _L'analyse des données. II
+     L'analyse des correspondances_, Bordas, Paris. 1-620.
+     Greenacre, M. J. (1984) _Theory and applications of correspondence
+     analysis_, Academic Press, London.
+
+
+Si R help from ade4 (dudi.coa) and https://pbil.univ-lyon1.fr/R/pdf/stage4.pdf
+
+
+```{r}
+data(rpjdl)
+chisq.test(rpjdl$fau)$statistic
+rpjdl.coa <- coa1 <- dudi.coa(rpjdl$fau, scannf = FALSE, nf = 4)
+sum(rpjdl.coa$eig)*rpjdl.coa$N # the same
+```
+
+```{r}
+write.csv(rpjdl$fau,file="fau.csv")
+```
+
+
+
+```{python}
+# import numpy as np 
+import pandas as pd
+fau = pd.read_csv('fau.csv')
+fau
+del fau['Unnamed: 0']
+fau
+```
+
+
+
+```{python}
+import numpy as np
+
+X=fau
+sumX = fau.sum().sum()
+sumCol =  fau.sum(axis=0)
+sumRow = fau.sum(axis=1)
+
+pij = X/sumX
+pi = sumRow/sumX
+pj = sumCol/sumX
+
+Dj = np.diag(1/pj)
+Di = np.diag(1/pi)
+
+Z = np.dot(Di,pij)
+Z= np.dot(Z,Dj)
+Z.shape
+Z =Z - 1
+Z = np.nan_to_num(Z)
+
+# Normalize
+lw = pi
+cw = pj
+X =Z
+ted = pydudi(Z,cw,lw,2)
+```
+
+
+```{r}
+head(t(t(py$X)%*%py$D))[,1]
+head(py$X*diag(py$D))[,1]
+```
+
+
+```{r}
+head(py$XD%*%py$Q)[,1]
+head(sweep(py$XD,2,diag(py$Q),"*"))[,1]
+```
+
+```{r}
+coa1$eig
+py$eigenvalues
+```
+
+
+ok for the eigenvalues, probleme dans le calcul des coordonnées ???
+
+```{r}
+require(reticulate)
+names(py$ted) <- c("eig","rank","li","l1","co","c1","nf")
+coordli <- py$ted$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="Python version")
+s.label(coa1$li,sub="R version")
+plot(coordli[,1],coa1$li[,1],panel.first=c(grid()),xlab="Python (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordli[,2],coa1$li[,2],panel.first=c(grid()),xlab="Python (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r}
+par(mfrow=c(2,2))
+s.label(coordl1,sub="Python version")
+s.label(coa1$l1,sub="R version")
+plot(coordl1[,1],coa1$l1[,1],panel.first=c(grid()),xlab="Python (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordl1[,2],coa1$l1[,2],panel.first=c(grid()),xlab="Python (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r}
+plot(py$Z[,1],coa1$tab[,1])
+plot(py$ted$c1[,1],coa1$c1[,1])
+```
+
+
+=> need to check the weight !!!
+
+
 
