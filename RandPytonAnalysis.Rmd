@@ -400,6 +400,7 @@ MCA: Multiple Correspondence Analysis
 
 
 Si R help from ade4 (dudi.acm) and https://pbil.univ-lyon1.fr/R/pdf/stage4.pdf. the description of the methods is given below:
+
  - https://pbil.univ-lyon1.fr/R/pdf/tdr521.pdf
  - https://pbil.univ-lyon1.fr/R/pdf/tdr52.pdf
 
@@ -490,6 +491,7 @@ plot(py$ted$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Python (Axis 1)",ylab
 # Class and object dudi
 
 define the structure of the object and description of the elements based on object 'dudi' from R package ade4 (and ADE-4):
+
  - tab
  - eig
  - rank
@@ -499,7 +501,82 @@ define the structure of the object and description of the elements based on obje
  - li
 
 
+```{python}
+class Dudi:
+  def __init__(self,tab,eig,rank,nf,c1,co,l1,li):
+    self.tab = tab
+    self.eig = eig
+    self.rank = rank
+    self.nf = nf
+    self.c1 = c1
+    self.co = co
+    self.l1 = l1
+    self.li = li
+
+def pyDudi(X,cw,lw,nf):
+  dim = X.shape
+  n = dim[0]
+  p = dim[1]
+  nf0 = nf-1
+  # n=len(X)
+  # p=len(X.columns)
+  D = np.diag(np.sqrt(lw))
+  Q = np.diag(np.sqrt(cw))
+  
+  # XtDXQ => problem  with Q !!!
+  XD = np.dot(X.T,D).T
+  XD = np.dot(XD,Q)
+  XtX = np.dot(XD.T,XD)
+  
+  # decomposition
+  eigenvalues, eigenvectors = np.linalg.eig(XtX)
+  index = np.argsort(eigenvalues)[::-1]
+  
+  # np.nonzero(eigenvalues)[0]
+  eigenvalues = eigenvalues.real
+  eigenvectors = eigenvectors.real
+  eigenvalues=eigenvalues[index]
+  eigenvectors=eigenvectors[:,index]
+  # results
+  rank = len(np.nonzero(eigenvalues)[0])
+  C1 = np.dot(np.diag(1/np.sqrt(cw)),eigenvectors[:,0:nf])
+  #C1 = eigenvectors[:,0:nf]
+  XQ = np.dot(X,np.diag(cw))
+  Li = np.dot(XQ, C1)
+  
+  # need to adjust the weighting (problem with sqrt)
+  L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues[0:nf])))
+  Co = np.dot(C1,np.diag(np.sqrt(eigenvalues[0:nf])))
+  return Dudi(X,eigenvalues,rank,nf,C1,Co,L1,Li);
+```
+
+test pour PCA
+```{python}
+def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
+  dim = X.shape
+  n = dim[0]
+  p = dim[1]  
+  if center:
+    X = X-X.mean()
+  if scale:
+    X = X/X.std(ddof=0)
+  if lw==None :
+    lw = pd.DataFrame(np.repeat(1/n,n))[0]
+  if cw==None :
+    cw = pd.DataFrame(np.repeat(1,p))[0]
+  dudi = pyDudi(X,cw,lw,nf)  
+  return dudi;
+```
+
+
+```{python}
+pca1 = pyPCA(deugtab)
+```
+
+
+
 heritage for the PCA and COA (and other methods):
+
  - tab
  - lw
  - cw
