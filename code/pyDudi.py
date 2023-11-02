@@ -2,6 +2,9 @@
 # Class Dudi and function to compute object Dudi
 # 2023-11-02 modified by pbady
 #------------------------------------------
+import pandas as pd
+import numpy as np
+
 class Dudi:
   def __init__(self,tab,eig,rank,nf,c1,co,l1,li):
     self.tab = tab

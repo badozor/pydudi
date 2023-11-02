@@ -28,10 +28,16 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ```
 
+# Motivations
+The objective of this document is to propose an implementation of data analysis methods based on duality diagram in python and to develop and expand my skill in python.
 
 
-## PCA
+# first test PCA based on R package ade4
+<a href="#top">Back to top</a>
 
+***
+
+## Example from the R package ade4
 
 ```{r}
 library(ade4)
@@ -46,26 +52,30 @@ pca2 <- dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
 The script can be directly usd in Rstudio and R via the R package reticulate (https://rstudio.github.io/reticulate/).
 
 ```{r}
-write.csv(deug$tab,file="deugtab.csv")
+write.csv(deug$tab,file="data/deugtab.csv")
 ```
 
 
 
-# Data importation
+## Data importation
 
 see for example: https://www.kaggle.com/code/arnopub/pandas-pr-sentation-des-dataframe
 
 ```{python}
 import numpy as np 
 import pandas as pd
-deugtab = pd.read_csv('deugtab.csv')
+deugtab = pd.read_csv('data/deugtab.csv')
 deugtab
 del deugtab['Unnamed: 0']
 deugtab
 ```
 
 
-# PCA from scratch 
+# PCA from scratch in python
+<a href="#top">Back to top</a>
+
+***
+
 
 PCA from scratch (https://towardsdatascience.com/principal-component-analysis-from-scratch-in-numpy-61843da1f967)
 
@@ -121,6 +131,9 @@ plt.show()
 
 
 # Collaboration R and python
+<a href="#top">Back to top</a>
+
+***
 
 https://rstudio.github.io/reticulate/
 
@@ -181,7 +194,10 @@ print(pca.singular_values_*pca.singular_values_)
 ```
 
 
-# Construction of the function "pydudi"
+# Construction of the function "pydudi" (first prototype)
+<a href="#top">Back to top</a>
+
+***
 
 based on the duality diagram (see more details below)
 
@@ -240,12 +256,12 @@ def pydudi(X,cw,lw,nf):
 ###
 ```
 
-# Test pydudi with PCA
+## Test pydudi with PCA
 
 ```{python}
 import numpy as np 
 import pandas as pd
-deugtab = pd.read_csv('deugtab.csv')
+deugtab = pd.read_csv('data/deugtab.csv')
 deugtab
 del deugtab['Unnamed: 0']
 deugtab
@@ -292,7 +308,7 @@ plot(py$ted$c1[,1],pca2$c1[,1],panel.first=c(grid()),xlab="Python (axis 1)",ylab
 plot(py$ted$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="Python (axis 2)",ylab="R (axis 2)",pch=19);abline(0,-1,col="red")
 ```
 
-# Test pydudi with COA
+## Test pydudi with COA
 
 COA: correspondence analysis.
 
@@ -313,7 +329,7 @@ sum(rpjdl.coa$eig)*rpjdl.coa$N # the same
 ```
 
 ```{r}
-write.csv(rpjdl$fau,file="fau.csv")
+write.csv(rpjdl$fau,file="data/fau.csv")
 ```
 
 
@@ -321,7 +337,7 @@ write.csv(rpjdl$fau,file="fau.csv")
 ```{python}
 # import numpy as np 
 import pandas as pd
-fau = pd.read_csv('fau.csv')
+fau = pd.read_csv('data/fau.csv')
 fau
 del fau['Unnamed: 0']
 fau
@@ -415,7 +431,7 @@ plot(py$ted$co[,1],coa1$co[,1],panel.first=c(grid()),xlab="Python (Axis 1)",ylab
 
 => need to check the weight !!! => Ok !!
 
-# Test pydudi with MCA
+## Test pydudi with MCA
 
 MCA: Multiple Correspondence Analysis
 
@@ -440,7 +456,7 @@ acm1 <- dudi.acm(ours, scan = FALSE)
 
 
 ```{r}
-write.csv(ours,file="ours.csv")
+write.csv(ours,file="data/ours.csv")
 ```
 
 
@@ -448,7 +464,7 @@ importation with pandas
 ```{python}
 # import numpy as np 
 import pandas as pd
-ours = pd.read_csv('ours.csv')
+ours = pd.read_csv('data/ours.csv')
 ours
 del ours['Unnamed: 0']
 ours
@@ -513,6 +529,10 @@ plot(py$ted$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Python (Axis 1)",ylab
 
 
 # Class and object dudi
+<a href="#top">Back to top</a>
+
+***
+
 
 define the structure of the object and description of the elements based on object 'dudi' from R package ade4 (and ADE-4):
 
@@ -524,6 +544,13 @@ define the structure of the object and description of the elements based on obje
  - l1
  - li
 
+heritage for the PCA and COA (and other methods):
+
+ - tab
+ - lw
+ - cw
+ - dudi
+ - and specific elements
 
 ```{python}
 class Dudi:
@@ -574,7 +601,8 @@ def pyDudi(X,cw,lw,nf):
   return Dudi(X,eigenvalues,rank,nf,C1,Co,L1,Li);
 ```
 
-test pour PCA
+ * test pour PCA
+ 
 ```{python}
 def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
   dim = X.shape
@@ -597,15 +625,89 @@ def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
 pca1 = pyPCA(deugtab)
 ```
 
+ * test pour COA
+ 
+```{python}
+def pyCOA(X,nf=2):
+  sumX = X.sum().sum()
+  sumCol =  X.sum(axis=0)
+  sumRow = X.sum(axis=1)
+  pij = X/sumX
+  pi = sumRow/sumX
+  pj = sumCol/sumX
+  Dj = np.diag(1/pj)
+  Di = np.diag(1/pi)
+  Z = np.dot(Di,pij)
+  Z = np.dot(Z,Dj)
+  Z = Z - 1
+  Z = np.nan_to_num(Z)
+  dudi = pyDudi(Z,pj,pi,nf)  
+  return dudi;
+```
 
 
-heritage for the PCA and COA (and other methods):
+```{python}
+coa1 = pyCOA(fau)
+```
 
- - tab
- - lw
- - cw
- - dudi
- - and specific elements
+ * test pour ACM
+ 
+```{python}
+def disjonctif(X):
+  X_cat = X.astype("category")
+  X_dis = pd.get_dummies(X_cat)
+  X_dis = X_dis*1
+  return X_dis;
+
+def pyACM(X,lw=None,nf=2):
+  Xdis = disjonctif(ours)
+  m = Xdis.shape[1]
+  n = Xdis.shape[0]
+  v = ours.shape[1]
+  if lw==None :
+    lw = pd.DataFrame(np.repeat(1/n,n))[0]
+  D = np.diag(lw)
+  cw = np.dot(np.dot(Xdis.T,D), np.ones(n)) 
+  Dm = np.diag(cw)
+  X = np.dot(Xdis,np.diag(1/cw))-1
+  cw = cw/v
+  dudi = pyDudi(X,cw,lw,nf)    
+  return dudi;
+```
 
 
+```{python}
+mca1 = pyACM(ours)
+```
 
+
+# References
+<a href="#top">Back to top</a>
+
+***
+
+-   R <http://www.R-project.org/>.
+-   R Core Team (2013). R: A language and environment for statistical
+    computing. R Foundation for Statistical Computing, Vienna, Austria.
+    URL <http://www.R-project.org/>.
+-   Dray S, Dufour A (2007). “The ade4 Package: Implementing the Duality Diagram for Ecologists.” _Journal of Statistical Software_, *22*(4), 1-20. doi:10.18637/jss.v022.i04
+  <https://doi.org/10.18637/jss.v022.i04>.
+-   Chessel D, Dufour A, Thioulouse J (2004). “The ade4 Package - I: One-Table Methods.” _R News_, *4*(1), 5-10. <https://cran.r-project.org/doc/Rnews/>.
+-   Dray S, Dufour A, Chessel D (2007). “The ade4 Package - II: Two-Table and K-Table Methods.” _R News_, *7*(2), 47-52. <https://cran.r-project.org/doc/Rnews/>.
+-   Thioulouse J, Dray S, Dufour A, Siberchicot A, Jombart T, Pavoine S (2018). _Multivariate Analysis of Ecological Data with ade4_. Springer. doi:10.1007/978-1-4939-8850-1 <https://doi.org/10.1007/978-1-4939-8850-1>.
+
+# Appendix
+<a href="#top">Back to top</a>
+
+***
+
+
+## Additional R functions
+
+```{r}
+source("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R")
+```
+
+## Session information
+
+`{r} print(sessionInfo(),locale=FALSE)`

@@ -1,5 +1,6 @@
 # pydudi
-The objective of this module is to implemente Data analysis methods based on duality diagram in python and to developp and expand my skill in python. 
+The objective of this module is to propose an implementation of data analysis methods based on duality diagram in python and to develop and expand my skill in python.
+ 
 
 
 # references 

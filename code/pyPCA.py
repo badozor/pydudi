@@ -2,6 +2,8 @@
 # PCA returning object Dudi
 # 2023-11-02 modified by pbady
 #------------------------------------------
+import pandas as pd
+import numpy as np
 
 def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
   dim = X.shape
