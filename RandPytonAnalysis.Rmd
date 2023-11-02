@@ -202,8 +202,10 @@ def pydudi(X,cw,lw,nf):
   eigenvectors=eigenvectors[:,index]
   # results
   rank = len(np.nonzero(eigenvalues)[0])
-  C1 = eigenvectors[:,0:nf]
-  Li = np.dot(X, C1)
+  C1 = np.dot(np.diag(1/np.sqrt(cw)),eigenvectors[:,0:nf])
+  #C1 = eigenvectors[:,0:nf]
+  XQ = np.dot(X,np.diag(cw))
+  Li = np.dot(XQ, C1)
   
   # need to adjust the weighting (problem with sqrt)
   L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues[0:nf])))
@@ -325,9 +327,18 @@ Z = np.nan_to_num(Z)
 # Normalize
 lw = pi
 cw = pj
+D= np.diag(np.sqrt(pi))
+Q= np.diag(np.sqrt(pj))
 X =Z
 ted = pydudi(Z,cw,lw,2)
 ```
+
+
+```{r}
+require(reticulate)
+names(py$ted) <- c("eig","rank","li","l1","co","c1","nf")
+```
+
 
 
 ```{r}
@@ -337,21 +348,20 @@ head(py$X*diag(py$D))[,1]
 
 
 ```{r}
-head(py$XD%*%py$Q)[,1]
-head(sweep(py$XD,2,diag(py$Q),"*"))[,1]
+XD <- t(t(py$X)%*%py$D)
+head(XD%*%py$Q)[,1]
+head(sweep(XD,2,diag(py$Q),"*"))[,1]
 ```
 
 ```{r}
 coa1$eig
-py$eigenvalues
+py$ted$eig
 ```
 
 
 ok for the eigenvalues, probleme dans le calcul des coordonnées ???
 
 ```{r}
-require(reticulate)
-names(py$ted) <- c("eig","rank","li","l1","co","c1","nf")
 coordli <- py$ted$li
 par(mfrow=c(2,2))
 s.label(coordli,sub="Python version")
@@ -361,6 +371,7 @@ plot(coordli[,2],coa1$li[,2],panel.first=c(grid()),xlab="Python (CS 2)",ylab="R 
 ```
 
 ```{r}
+coordl1 <- py$ted$l1
 par(mfrow=c(2,2))
 s.label(coordl1,sub="Python version")
 s.label(coa1$l1,sub="R version")
@@ -368,13 +379,15 @@ plot(coordl1[,1],coa1$l1[,1],panel.first=c(grid()),xlab="Python (CS 1)",ylab="R 
 plot(coordl1[,2],coa1$l1[,2],panel.first=c(grid()),xlab="Python (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
 ```
 
-```{r}
-plot(py$Z[,1],coa1$tab[,1])
-plot(py$ted$c1[,1],coa1$c1[,1])
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+plot(py$Z[,1],coa1$tab[,1],panel.first=c(grid()),xlab="Python (col 1 of Z)",ylab="R (col 1 of tab)",pch=19);abline(0,1,col="red")
+plot(py$ted$c1[,1],coa1$c1[,1],panel.first=c(grid()),xlab="Python (normed Axis 1)",ylab="R (normed Axis 1)",pch=19);abline(0,-1,col="red")
+plot(py$ted$co[,1],coa1$co[,1],panel.first=c(grid()),xlab="Python (Axis 1)",ylab="R (Axis 1)",pch=19);abline(0,-1,col="red")
 ```
 
 
-=> need to check the weight !!!
+=> need to check the weight !!! => Ok !!
 
 
 
