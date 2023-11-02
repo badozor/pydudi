@@ -1,5 +1,5 @@
 # pydudi
-Data analysis based on duality diagram
+The objective of this module is to implemente Data analysis methods based on duality diagram in python and to developp and expend my skill in python. 
 
 
 # references 
