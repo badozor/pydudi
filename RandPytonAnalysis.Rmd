@@ -1,8 +1,32 @@
 ---
 title: "Data Analysis with R and Python"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
 date: "2023-09-27"
 ---
+
+-   **Contributor:** P.BADY
+-   **Date:** `r date()`
+-   **Abstract:**
+
+
+```         
+License: GPL version 2 or newer
+Copyright (C) 2009-2017  Pierre Bady
+
+This program is free software/document; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program/document is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+```
 
 
 
