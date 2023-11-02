@@ -314,6 +314,7 @@ COA: correspondence analysis.
 
      Benzécri, J.P. and Coll. (1973) _L'analyse des données. II
      L'analyse des correspondances_, Bordas, Paris. 1-620.
+     
      Greenacre, M. J. (1984) _Theory and applications of correspondence
      analysis_, Academic Press, London.
 
@@ -695,6 +696,12 @@ mca1 = pyACM(ours)
 -   Chessel D, Dufour A, Thioulouse J (2004). “The ade4 Package - I: One-Table Methods.” _R News_, *4*(1), 5-10. <https://cran.r-project.org/doc/Rnews/>.
 -   Dray S, Dufour A, Chessel D (2007). “The ade4 Package - II: Two-Table and K-Table Methods.” _R News_, *7*(2), 47-52. <https://cran.r-project.org/doc/Rnews/>.
 -   Thioulouse J, Dray S, Dufour A, Siberchicot A, Jombart T, Pavoine S (2018). _Multivariate Analysis of Ecological Data with ade4_. Springer. doi:10.1007/978-1-4939-8850-1 <https://doi.org/10.1007/978-1-4939-8850-1>.
+-   Escoufier, Y. (1987) The duality diagram : a means of better practical applications In Development in numerical ecology, Legendre, P. & Legendre, L. (Eds.) NATO advanced Institute, Serie G. Springer Verlag, Berlin, 139–156.
+-   Benzécri, J.P. and Coll. (1973) _L'analyse des données. II L'analyse des correspondances_, Bordas, Paris. 1-620.
+-   Greenacre, M. J. (1984) _Theory and applications of correspondence analysis_, Academic Press, London.
+-   Tenenhaus, M. & Young, F.W. (1985) An analysis and synthesis of multiple correspondence analysis, optimal scaling, dual scaling, homogeneity analysis ans other methods for quantifying categorical multivariate data. Psychometrika, 50, 1, 91-119.
+-   Lebart, L., A. Morineau, and M. Piron. 1995. Statistique exploratoire multidimensionnelle. Dunod, Paris.
+
 
 # Appendix
 <a href="#top">Back to top</a>
@@ -710,4 +717,7 @@ source("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R")
 
 ## Session information
 
-`{r} print(sessionInfo(),locale=FALSE)`
+```{r}
+print(sessionInfo(),locale=FALSE)
+```
+
