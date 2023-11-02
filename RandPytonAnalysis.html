@@ -374,7 +374,14 @@ ade4</a></li>
 <li><a href="#test-pydudi-with-mca" id="toc-test-pydudi-with-mca"><span class="toc-section-number">5.3</span> Test pydudi with MCA</a></li>
 </ul></li>
 <li><a href="#class-and-object-dudi" id="toc-class-and-object-dudi"><span class="toc-section-number">6</span>
-Class and object dudi</a></li>
+Class and object dudi</a>
+<ul>
+<li><a href="#object-dudi" id="toc-object-dudi"><span class="toc-section-number">6.1</span> Object
+<strong>Dudi</strong></a></li>
+<li><a href="#test-pour-pca" id="toc-test-pour-pca"><span class="toc-section-number">6.2</span> test pour PCA</a></li>
+<li><a href="#test-pour-coa" id="toc-test-pour-coa"><span class="toc-section-number">6.3</span> test pour COA</a></li>
+<li><a href="#test-pour-acm" id="toc-test-pour-acm"><span class="toc-section-number">6.4</span> test pour ACM</a></li>
+</ul></li>
 <li><a href="#references" id="toc-references"><span class="toc-section-number">7</span> References</a></li>
 <li><a href="#appendix" id="toc-appendix"><span class="toc-section-number">8</span> Appendix</a>
 <ul>
@@ -386,7 +393,7 @@ Class and object dudi</a></li>
 
 <ul>
 <li><strong>Contributor:</strong> P.BADY</li>
-<li><strong>Date:</strong> Thu Nov 2 15:59:26 2023</li>
+<li><strong>Date:</strong> Thu Nov 2 16:33:25 2023</li>
 <li><strong>Abstract:</strong></li>
 </ul>
 <pre><code>License: GPL version 2 or newer
@@ -1054,9 +1061,14 @@ based on object ‘dudi’ from R package ade4 (and ADE-4):</p>
 <li>dudi</li>
 <li>and specific elements</li>
 </ul>
+<div id="object-dudi" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Object
+<strong>Dudi</strong></h2>
 <pre class="python"><code>class Dudi:
-  def __init__(self,tab,eig,rank,nf,c1,co,l1,li):
+  def __init__(self,tab,cw,lw,eig,rank,nf,c1,co,l1,li):
     self.tab = tab
+    self.cw = cw
+    self.lw = lw
     self.eig = eig
     self.rank = rank
     self.nf = nf
@@ -1099,10 +1111,10 @@ def pyDudi(X,cw,lw,nf):
   # need to adjust the weighting (problem with sqrt)
   L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues[0:nf])))
   Co = np.dot(C1,np.diag(np.sqrt(eigenvalues[0:nf])))
-  return Dudi(X,eigenvalues,rank,nf,C1,Co,L1,Li);</code></pre>
-<ul>
-<li>test pour PCA</li>
-</ul>
+  return Dudi(X,cw,lw,eigenvalues,rank,nf,C1,Co,L1,Li);</code></pre>
+</div>
+<div id="test-pour-pca" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> test pour PCA</h2>
 <pre class="python"><code>def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
   dim = X.shape
   n = dim[0]
@@ -1118,9 +1130,9 @@ def pyDudi(X,cw,lw,nf):
   dudi = pyDudi(X,cw,lw,nf)  
   return dudi;</code></pre>
 <pre class="python"><code>pca1 = pyPCA(deugtab)</code></pre>
-<ul>
-<li>test pour COA</li>
-</ul>
+</div>
+<div id="test-pour-coa" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> test pour COA</h2>
 <pre class="python"><code>def pyCOA(X,nf=2):
   sumX = X.sum().sum()
   sumCol =  X.sum(axis=0)
@@ -1137,9 +1149,9 @@ def pyDudi(X,cw,lw,nf):
   dudi = pyDudi(Z,pj,pi,nf)  
   return dudi;</code></pre>
 <pre class="python"><code>coa1 = pyCOA(fau)</code></pre>
-<ul>
-<li>test pour ACM</li>
-</ul>
+</div>
+<div id="test-pour-acm" class="section level2" number="6.4">
+<h2><span class="header-section-number">6.4</span> test pour ACM</h2>
 <pre class="python"><code>def disjonctif(X):
   X_cat = X.astype(&quot;category&quot;)
   X_dis = pd.get_dummies(X_cat)
@@ -1161,6 +1173,7 @@ def pyACM(X,lw=None,nf=2):
   dudi = pyDudi(X,cw,lw,nf)    
   return dudi;</code></pre>
 <pre class="python"><code>mca1 = pyACM(ours)</code></pre>
+</div>
 </div>
 <div id="references" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> References</h1>

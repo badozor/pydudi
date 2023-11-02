@@ -6,8 +6,10 @@ import pandas as pd
 import numpy as np
 
 class Dudi:
-  def __init__(self,tab,eig,rank,nf,c1,co,l1,li):
+  def __init__(self,tab,cw,lw,eig,rank,nf,c1,co,l1,li):
     self.tab = tab
+    self.cw = cw
+    self.lw = lw
     self.eig = eig
     self.rank = rank
     self.nf = nf
@@ -50,4 +52,4 @@ def pyDudi(X,cw,lw,nf):
   # need to adjust the weighting (problem with sqrt)
   L1 = np.dot(Li,np.diag(1/np.sqrt(eigenvalues[0:nf])))
   Co = np.dot(C1,np.diag(np.sqrt(eigenvalues[0:nf])))
-  return Dudi(X,eigenvalues,rank,nf,C1,Co,L1,Li);
+  return Dudi(X,cw,lw,eigenvalues,rank,nf,C1,Co,L1,Li);
