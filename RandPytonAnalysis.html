@@ -12,7 +12,7 @@
 
 <meta name="date" content="2023-09-27" />
 
-<title>Data Analysis with R and Python</title>
+<title>Data Analysis with R, Python and Rcpp</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -349,7 +349,7 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Data Analysis with R and Python</h1>
+<h1 class="title toc-ignore">Data Analysis with R, Python and Rcpp</h1>
 <h4 class="date">2023-09-27</h4>
 
 </div>
@@ -382,18 +382,28 @@ Class and object dudi</a>
 <li><a href="#test-pour-coa" id="toc-test-pour-coa"><span class="toc-section-number">6.3</span> test pour COA</a></li>
 <li><a href="#test-pour-acm" id="toc-test-pour-acm"><span class="toc-section-number">6.4</span> test pour ACM</a></li>
 </ul></li>
-<li><a href="#references" id="toc-references"><span class="toc-section-number">7</span> References</a></li>
-<li><a href="#appendix" id="toc-appendix"><span class="toc-section-number">8</span> Appendix</a>
+<li><a href="#construction-of-the-function-dudi-in-rcpp" id="toc-construction-of-the-function-dudi-in-rcpp"><span class="toc-section-number">7</span> Construction of the function dudi in
+Rcpp</a>
 <ul>
-<li><a href="#additional-r-functions" id="toc-additional-r-functions"><span class="toc-section-number">8.1</span> Additional R functions</a></li>
-<li><a href="#session-information" id="toc-session-information"><span class="toc-section-number">8.2</span> Session information</a></li>
+<li><a href="#test-rcpp-correlation-between-two-variables" id="toc-test-rcpp-correlation-between-two-variables"><span class="toc-section-number">7.1</span> Test Rcpp: correlation between two
+variables</a></li>
+<li><a href="#object-dudi-1" id="toc-object-dudi-1"><span class="toc-section-number">7.2</span> Object dudi</a></li>
+<li><a href="#test-pca" id="toc-test-pca"><span class="toc-section-number">7.3</span> Test PCA</a></li>
+<li><a href="#test-coa" id="toc-test-coa"><span class="toc-section-number">7.4</span> Test COA</a></li>
+<li><a href="#test-mca" id="toc-test-mca"><span class="toc-section-number">7.5</span> Test MCA</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references"><span class="toc-section-number">8</span> References</a></li>
+<li><a href="#appendix" id="toc-appendix"><span class="toc-section-number">9</span> Appendix</a>
+<ul>
+<li><a href="#additional-r-functions" id="toc-additional-r-functions"><span class="toc-section-number">9.1</span> Additional R functions</a></li>
+<li><a href="#session-information" id="toc-session-information"><span class="toc-section-number">9.2</span> Session information</a></li>
 </ul></li>
 </ul>
 </div>
 
 <ul>
 <li><strong>Contributor:</strong> P.BADY</li>
-<li><strong>Date:</strong> Thu Nov 2 16:33:25 2023</li>
+<li><strong>Date:</strong> Fri Nov 10 10:18:06 2023</li>
 <li><strong>Abstract:</strong></li>
 </ul>
 <pre><code>License: GPL version 2 or newer
@@ -412,7 +422,8 @@ GNU General Public License for more details.</code></pre>
 <h1><span class="header-section-number">1</span> Motivations</h1>
 <p>The objective of this document is to propose an implementation of
 data analysis methods based on duality diagram in python and to develop
-and expand my skill in python.</p>
+and expand my skill in python. The document contains information related
+to the use of Rcpp (R and C++).</p>
 </div>
 <div id="first-test-pca-based-on-r-package-ade4" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> first test PCA based on
@@ -1175,8 +1186,43 @@ def pyACM(X,lw=None,nf=2):
 <pre class="python"><code>mca1 = pyACM(ours)</code></pre>
 </div>
 </div>
-<div id="references" class="section level1" number="7">
-<h1><span class="header-section-number">7</span> References</h1>
+<div id="construction-of-the-function-dudi-in-rcpp" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Construction of the
+function dudi in Rcpp</h1>
+<div id="test-rcpp-correlation-between-two-variables" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Test Rcpp:
+correlation between two variables</h2>
+<pre class="r"><code>require(parallel)</code></pre>
+<pre><code>## Le chargement a nécessité le package : parallel</code></pre>
+<pre class="r"><code>require(Rcpp)</code></pre>
+<pre><code>## Le chargement a nécessité le package : Rcpp</code></pre>
+<pre class="r"><code>require(RcppArmadillo)</code></pre>
+<pre><code>## Le chargement a nécessité le package : RcppArmadillo</code></pre>
+<pre class="r"><code>#Sys.setenv(&quot;PKG_CXXFLAGS&quot;=&quot;-fopenmp&quot;)
+#Sys.setenv(&quot;PKG_LIBS&quot;=&quot;-fopenmp&quot;)
+sourceCpp(file.path(getwd(),&quot;src&quot;,&quot;utility.cpp&quot;))</code></pre>
+<p>correlation coefficient</p>
+<pre class="r"><code>cor(1:10, 2:11) </code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>CORR(1:10, 2:11) </code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>computation of the area under curve</p>
+</div>
+<div id="object-dudi-1" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> Object dudi</h2>
+</div>
+<div id="test-pca" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Test PCA</h2>
+</div>
+<div id="test-coa" class="section level2" number="7.4">
+<h2><span class="header-section-number">7.4</span> Test COA</h2>
+</div>
+<div id="test-mca" class="section level2" number="7.5">
+<h2><span class="header-section-number">7.5</span> Test MCA</h2>
+</div>
+</div>
+<div id="references" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> References</h1>
 <p><a href="#top">Back to top</a></p>
 <hr />
 <ul>
@@ -1211,20 +1257,20 @@ multivariate data. Psychometrika, 50, 1, 91-119.</li>
 exploratoire multidimensionnelle. Dunod, Paris.</li>
 </ul>
 </div>
-<div id="appendix" class="section level1" number="8">
-<h1><span class="header-section-number">8</span> Appendix</h1>
+<div id="appendix" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Appendix</h1>
 <p><a href="#top">Back to top</a></p>
 <hr />
-<div id="additional-r-functions" class="section level2" number="8.1">
-<h2><span class="header-section-number">8.1</span> Additional R
+<div id="additional-r-functions" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Additional R
 functions</h2>
 <pre class="r"><code>source(&quot;/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R&quot;)</code></pre>
 </div>
-<div id="session-information" class="section level2" number="8.2">
-<h2><span class="header-section-number">8.2</span> Session
+<div id="session-information" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Session
 information</h2>
 <pre class="r"><code>print(sessionInfo(),locale=FALSE)</code></pre>
-<pre><code>## R version 4.3.1 (2023-06-16)
+<pre><code>## R version 4.3.2 (2023-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## Running under: Linux Mint 20.3
 ## 
@@ -1233,19 +1279,19 @@ information</h2>
 ## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0
 ## 
 ## attached base packages:
-## [1] datasets  stats     graphics  utils     stats4    tools     grDevices
-## [8] methods   base     
+##  [1] parallel  datasets  stats     graphics  utils     stats4    tools    
+##  [8] grDevices methods   base     
 ## 
 ## other attached packages:
-##  [1] reticulate_1.28      pixmap_0.4-12        ade4_1.7-22         
-##  [4] RColorBrewer_1.1-3   rtracklayer_1.60.0   GenomicRanges_1.52.0
-##  [7] GenomeInfoDb_1.36.0  IRanges_2.34.0       S4Vectors_0.38.1    
-## [10] BiocGenerics_0.46.0 
+##  [1] RcppArmadillo_0.12.2.0.0 Rcpp_1.0.10              reticulate_1.28         
+##  [4] pixmap_0.4-12            ade4_1.7-22              RColorBrewer_1.1-3      
+##  [7] rtracklayer_1.60.0       GenomicRanges_1.52.0     GenomeInfoDb_1.36.0     
+## [10] IRanges_2.34.0           S4Vectors_0.38.1         BiocGenerics_0.46.0     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] sass_0.4.6                  bitops_1.0-7               
 ##  [3] lattice_0.21-8              digest_0.6.31              
-##  [5] evaluate_0.21               grid_4.3.1                 
+##  [5] evaluate_0.21               grid_4.3.2                 
 ##  [7] fastmap_1.1.1               rprojroot_2.0.3            
 ##  [9] jsonlite_1.8.4              Matrix_1.5-4               
 ## [11] restfulr_0.0.15             XML_3.99-0.14              
@@ -1255,19 +1301,18 @@ information</h2>
 ## [19] XVector_0.40.0              Biobase_2.60.0             
 ## [21] cachem_1.0.8                DelayedArray_0.26.2        
 ## [23] yaml_2.3.7                  S4Arrays_1.0.1             
-## [25] parallel_4.3.1              BiocParallel_1.34.1        
-## [27] GenomeInfoDbData_1.2.10     Rsamtools_2.16.0           
-## [29] here_1.0.1                  SummarizedExperiment_1.30.1
-## [31] png_0.1-8                   R6_2.5.1                   
-## [33] BiocIO_1.10.0               matrixStats_0.63.0         
-## [35] zlibbioc_1.46.0             MASS_7.3-60                
-## [37] bslib_0.4.2                 Rcpp_1.0.10                
-## [39] highr_0.10                  xfun_0.39                  
-## [41] GenomicAlignments_1.36.0    rstudioapi_0.15.0          
-## [43] MatrixGenerics_1.12.0       knitr_1.42                 
-## [45] rjson_0.2.21                htmltools_0.5.5            
-## [47] rmarkdown_2.21              compiler_4.3.1             
-## [49] RCurl_1.98-1.12</code></pre>
+## [25] BiocParallel_1.34.1         GenomeInfoDbData_1.2.10    
+## [27] Rsamtools_2.16.0            here_1.0.1                 
+## [29] SummarizedExperiment_1.30.1 png_0.1-8                  
+## [31] R6_2.5.1                    BiocIO_1.10.0              
+## [33] matrixStats_0.63.0          zlibbioc_1.46.0            
+## [35] MASS_7.3-60                 bslib_0.4.2                
+## [37] highr_0.10                  xfun_0.39                  
+## [39] GenomicAlignments_1.36.0    rstudioapi_0.15.0          
+## [41] MatrixGenerics_1.12.0       knitr_1.42                 
+## [43] rjson_0.2.21                htmltools_0.5.5            
+## [45] rmarkdown_2.21              compiler_4.3.2             
+## [47] RCurl_1.98-1.12</code></pre>
 </div>
 </div>
 

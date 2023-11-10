@@ -1,5 +1,5 @@
 ---
-title: "Data Analysis with R and Python"
+title: "Data Analysis with R, Python and Rcpp"
 output: 
   html_document: 
     toc: yes
@@ -29,7 +29,7 @@ GNU General Public License for more details.
 ```
 
 # Motivations
-The objective of this document is to propose an implementation of data analysis methods based on duality diagram in python and to develop and expand my skill in python.
+The objective of this document is to propose an implementation of data analysis methods based on duality diagram in python and to develop and expand my skill in python. The document contains information related to the use of Rcpp (R and C++).
 
 
 # first test PCA based on R package ade4
@@ -608,6 +608,11 @@ def pyDudi(X,cw,lw,nf):
 
 ## test pour PCA
  
+ 
+
+ 
+ 
+ 
 ```{python}
 def pyPCA(X,cw=None,lw=None,nf=2,center=True,scale=True):
   dim = X.shape
@@ -684,6 +689,59 @@ def pyACM(X,lw=None,nf=2):
 ```{python}
 mca1 = pyACM(ours)
 ```
+
+
+
+
+# Construction of the function dudi in Rcpp
+
+
+## Test Rcpp: correlation between two variables
+
+```{r}
+require(parallel)
+require(Rcpp)
+require(RcppArmadillo)
+#Sys.setenv("PKG_CXXFLAGS"="-fopenmp")
+#Sys.setenv("PKG_LIBS"="-fopenmp")
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+```
+
+correlation coefficient
+
+```{r}
+cor(1:10, 2:11) 
+CORR(1:10, 2:11) 
+```
+
+computation of the area under curve
+```{r}
+
+```
+
+
+
+
+## Object dudi
+
+```{r}
+
+```
+
+
+
+
+## Test PCA
+
+
+## Test COA
+
+
+## Test MCA
+
+
+
+
 
 
 
