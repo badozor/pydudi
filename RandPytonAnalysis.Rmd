@@ -716,7 +716,6 @@ CORR(1:10, 2:11)
 
 computation of the area under curve
 ```{r}
-
 ```
 
 
@@ -724,11 +723,43 @@ computation of the area under curve
 
 ## Object dudi
 
-```{r}
+dudi obect with Rcpparmadillo
 
+```{r}
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+pca2 <- dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
+test <- cdudi(as.matrix(pca2$tab),pca2$cw,pca2$lw,2)
+test$eig
+pca2$eig
 ```
 
 
+
+```{r}
+coordli <- test$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="RcppArmadillo version")
+s.label(pca2$li,sub="R version")
+plot(coordli[,1],pca2$li[,1],panel.first=c(grid()),xlab="RcppArmadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordli[,2],pca2$li[,2],panel.first=c(grid()),xlab="RcppArmadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r}
+coordl1 <- test$l1
+par(mfrow=c(2,2))
+s.label(coordl1,sub="RcppArmadillo version")
+s.label(pca2$l1,sub="R version")
+plot(coordl1[,1],pca2$l1[,1],panel.first=c(grid()),xlab="RcppArmadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordl1[,2],pca2$l1[,2],panel.first=c(grid()),xlab="RcppArmadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+s.corcircle(test$co,sub="RcppArmadillo version")
+s.corcircle(pca2$co,sub="R version")
+plot(test$c1[,1],pca2$c1[,1],panel.first=c(grid()),xlab="RcppArmadillo (axis 1)",ylab="R (axis 1)",pch=19);abline(0,-1,col="red")
+plot(test$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="RcppArmadillo (axis 2)",ylab="R (axis 2)",pch=19);abline(0,-1,col="red")
+```
 
 
 ## Test PCA
