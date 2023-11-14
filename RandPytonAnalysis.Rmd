@@ -729,8 +729,10 @@ dudi obect with Rcpparmadillo
 sourceCpp(file.path(getwd(),"src","utility.cpp"))
 pca2 <- dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
 test <- cdudi(as.matrix(pca2$tab),pca2$cw,pca2$lw,2)
+test2 <- cpca(as.matrix(deug$tab),pca2$cw,pca2$lw,2,1,1)
 test$eig
 pca2$eig
+test2$eig
 ```
 
 
@@ -763,6 +765,52 @@ plot(test$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="RcppArmadillo (axis 2)"
 
 
 ## Test PCA
+
+argument for the function cpca:
+ 
+ * X: matrix
+ * cw: numeric vector corresponding to the column weighting
+ * lw: numeric vector corresponding to the row weighting
+ * nf: number of selected axes
+ * center: 1 for TRUE, 0 for FALSE
+ * scale: 1 for TRUE, 0 for FALSE 
+
+
+```{r}
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+test2 <- cpca(as.matrix(deug$tab),pca2$cw,pca2$lw,2,1,1)
+pca2$eig
+test2$eig
+```
+
+
+```{r}
+coordli <- test2$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="RcppArmadillo version")
+s.label(pca2$li,sub="R version")
+plot(coordli[,1],pca2$li[,1],panel.first=c(grid()),xlab="RcppArmadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordli[,2],pca2$li[,2],panel.first=c(grid()),xlab="RcppArmadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r}
+coordl1 <- test2$l1
+par(mfrow=c(2,2))
+s.label(coordl1,sub="RcppArmadillo version")
+s.label(pca2$l1,sub="R version")
+plot(coordl1[,1],pca2$l1[,1],panel.first=c(grid()),xlab="RcppArmadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordl1[,2],pca2$l1[,2],panel.first=c(grid()),xlab="RcppArmadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+s.corcircle(test2$co,sub="RcppArmadillo version")
+s.corcircle(pca2$co,sub="R version")
+plot(test2$c1[,1],pca2$c1[,1],panel.first=c(grid()),xlab="RcppArmadillo (axis 1)",ylab="R (axis 1)",pch=19);abline(0,-1,col="red")
+plot(test2$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="RcppArmadillo (axis 2)",ylab="R (axis 2)",pch=19);abline(0,-1,col="red")
+```
+
+
 
 
 ## Test COA

@@ -113,4 +113,27 @@ List cdudi(arma::mat X,arma::vec cw,arma::vec lw,int nf){
   arma::mat co = c1*diagmat(sqrt(eigval.subvec(0,nf0)));
   return List::create(_["X"]=X,_["cw"]=cw,_["lw"]=lw,_["eig"]=eigval,_["nf"]=nf,_["c1"]=c1,_["co"]=co,_["l1"]=l1,_["li"]=li);
 }
+//[[Rcpp::export]]
+List cpca(arma::mat X,arma::vec cw,arma::vec lw,int nf,int center,int scale){
+  int i,j,n,p,nf0;
+  n = X.n_rows;
+  p = X.n_cols;
+  nf0=nf-1; 
+  arma::vec meanX(p);
+  arma::vec sdX(p);
+  if(center==1){
+    for(i=0;i<p;i++){
+      meanX(i) = arma::sum(lw % X.col(i))/arma::sum(lw);
+      X.col(i) = X.col(i)-meanX(i);
+     }
+  }
+  if(scale==1){
+    for(i=0;i<p;i++){
+      sdX(i) = sqrt(arma::sum(lw % X.col(i) % X.col(i))/arma::sum(lw));
+      X.col(i) = X.col(i)/sdX(i);
+    }
+  }
+  return cdudi(X,cw,lw,nf);
+}
+
 
