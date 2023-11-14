@@ -728,11 +728,9 @@ dudi obect with Rcpparmadillo
 ```{r}
 sourceCpp(file.path(getwd(),"src","utility.cpp"))
 pca2 <- dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
-test <- cdudi(as.matrix(pca2$tab),pca2$cw,pca2$lw,2)
-test2 <- cpca(as.matrix(deug$tab),pca2$cw,pca2$lw,2,1,1)
+test <- arc_dudi(as.matrix(pca2$tab),pca2$cw,pca2$lw,2)
 test$eig
 pca2$eig
-test2$eig
 ```
 
 
@@ -778,7 +776,7 @@ argument for the function cpca:
 
 ```{r}
 sourceCpp(file.path(getwd(),"src","utility.cpp"))
-test2 <- cpca(as.matrix(deug$tab),pca2$cw,pca2$lw,2,1,1)
+test2 <- arc_pca(as.matrix(deug$tab),pca2$cw,pca2$lw,2,1,1)
 pca2$eig
 test2$eig
 ```
@@ -816,12 +814,127 @@ plot(test2$c1[,2],pca2$c1[,2],panel.first=c(grid()),xlab="RcppArmadillo (axis 2)
 ## Test COA
 
 
+```{r}
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+data(rpjdl)
+chisq.test(rpjdl$fau)$statistic
+rpjdl.coa <- coa1 <- dudi.coa(rpjdl$fau, scannf = FALSE, nf = 4)
+sum(rpjdl.coa$eig)*rpjdl.coa$N # the same
+test <- arc_coa(as.matrix(rpjdl$fau),nf=2)
+```
+
+
+
+
+```{r}
+coordli <- test$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="Rcpp-Armadillo version")
+s.label(coa1$li,sub="R version")
+plot(coordli[,1],coa1$li[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,1,col="red")
+plot(coordli[,2],coa1$li[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r}
+coordl1 <- test$l1
+par(mfrow=c(2,2))
+s.label(coordl1,sub="Rcpp-Armadillo version")
+s.label(coa1$l1,sub="R version")
+plot(coordl1[,1],coa1$l1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,1,col="red")
+plot(coordl1[,2],coa1$l1[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,-1,col="red")
+```
+
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+plot(test$X[,1],coa1$tab[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (col 1 of Z)",ylab="R (col 1 of tab)",pch=19);abline(0,1,col="red")
+plot(test$c1[,1],coa1$c1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (normed Axis 1)",ylab="R (normed Axis 1)",pch=19);abline(0,1,col="red")
+plot(test$co[,1],coa1$co[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (Axis 1)",ylab="R (Axis 1)",pch=19);abline(0,1,col="red")
+```
+
+
+
+
+
 ## Test MCA
 
+```{r}
+data(ours)
+summary(ours)
+acm1 <- dudi.acm(ours, scan = FALSE)
+```
 
 
+for the first version of mca, we give the **disjonctif** table and the variable number.
+```{r}
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+test <- arc_mca_proto(as.matrix(acm.disjonctif(ours)),lw=acm1$lw,v=ncol(ours),nf=2)
+```
 
 
+```{r}
+coordli <- test$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="Rcpp-Armadillo version")
+s.label(acm1$li,sub="R version")
+plot(coordli[,1],acm1$li[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordli[,2],acm1$li[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,1,col="red")
+```
+
+```{r}
+coordl1 <- test$l1
+par(mfrow=c(2,2))
+s.label(coordl1,sub="Python version")
+s.label(acm1$l1,sub="R version")
+plot(coordl1[,1],acm1$l1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordl1[,2],acm1$l1[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,1,col="red")
+```
+
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+plot(test$X[,1],acm1$tab[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (col 1 of Z)",ylab="R (col 1 of tab)",pch=19);abline(0,1,col="red")
+plot(test$c1[,1],acm1$c1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (normed Axis 1)",ylab="R (normed Axis 1)",pch=19);abline(0,-1,col="red")
+plot(test$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (Axis 1)",ylab="R (Axis 1)",pch=19);abline(0,-1,col="red")
+```
+
+encoding **disjonctif** table
+```{r}
+sourceCpp(file.path(getwd(),"src","utility.cpp"))
+w <- factor(c("a","a","b","c"))
+acm.util(w)
+arc_acmutil(w)
+w1 <- factor(c("e","d","e","f"))
+arc_disjonctif(cbind(w,w1))
+```
+
+```{r}
+test <- arc_mca( as.matrix(apply(ours,2,function(x) as.numeric(factor(x)))),lw=acm1$lw,nf=2)
+```
+
+
+```{r}
+coordli <- test$li
+par(mfrow=c(2,2))
+s.label(coordli,sub="Rcpp-Armadillo version")
+s.label(acm1$li,sub="R version")
+plot(coordli[,1],acm1$li[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordli[,2],acm1$li[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,1,col="red")
+```
+
+```{r}
+coordl1 <- test$l1
+par(mfrow=c(2,2))
+s.label(coordl1,sub="Python version")
+s.label(acm1$l1,sub="R version")
+plot(coordl1[,1],acm1$l1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 1)",ylab="R (CS 1)",pch=19);abline(0,-1,col="red")
+plot(coordl1[,2],acm1$l1[,2],panel.first=c(grid()),xlab="Rcpp-Armadillo (CS 2)",ylab="R (CS 2)",pch=19);abline(0,1,col="red")
+```
+
+```{r fig.height=10,fig.width=10}
+par(mfrow=c(2,2))
+plot(test$X[,1],acm1$tab[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (col 1 of Z)",ylab="R (col 1 of tab)",pch=19);abline(0,1,col="red")
+plot(test$c1[,1],acm1$c1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (normed Axis 1)",ylab="R (normed Axis 1)",pch=19);abline(0,-1,col="red")
+plot(test$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (Axis 1)",ylab="R (Axis 1)",pch=19);abline(0,-1,col="red")
+```
 
 
 

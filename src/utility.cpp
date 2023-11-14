@@ -83,8 +83,8 @@ double CORR(arma::vec x,arma::vec y){
   return r;
 }
 //[[Rcpp::export]]
-List cdudi(arma::mat X,arma::vec cw,arma::vec lw,int nf){
-  int i,j,n,p,nf0;
+List arc_dudi(arma::mat X,arma::vec cw,arma::vec lw,int nf){
+  int n,p,nf0;
   n = X.n_rows;
   p = X.n_cols;
   nf0=nf-1; 
@@ -106,16 +106,16 @@ List cdudi(arma::mat X,arma::vec cw,arma::vec lw,int nf){
   eigval = eigval.elem(index);
   eigvec = eigvec.cols(index);
   //coordinates
-  arma::mat sqrtQ = diagmat(1/sqrt(cw));
-  arma::mat c1 = sqrtQ*eigvec.cols(0,nf0);
-  arma::mat li = (X*Q)*c1;
+  arma::mat isqrtQ = diagmat(1/sqrt(cw));
+  arma::mat c1 = isqrtQ*eigvec.cols(0,nf0);
+  arma::mat li = (X*diagmat(cw))*c1;
   arma::mat l1 = li*diagmat(1/sqrt(eigval.subvec(0,nf0)));
   arma::mat co = c1*diagmat(sqrt(eigval.subvec(0,nf0)));
   return List::create(_["X"]=X,_["cw"]=cw,_["lw"]=lw,_["eig"]=eigval,_["nf"]=nf,_["c1"]=c1,_["co"]=co,_["l1"]=l1,_["li"]=li);
 }
 //[[Rcpp::export]]
-List cpca(arma::mat X,arma::vec cw,arma::vec lw,int nf,int center,int scale){
-  int i,j,n,p,nf0;
+List arc_pca(arma::mat X,arma::vec cw,arma::vec lw,int nf,int center,int scale){
+  int i,n,p,nf0;
   n = X.n_rows;
   p = X.n_cols;
   nf0=nf-1; 
@@ -133,7 +133,78 @@ List cpca(arma::mat X,arma::vec cw,arma::vec lw,int nf,int center,int scale){
       X.col(i) = X.col(i)/sdX(i);
     }
   }
-  return cdudi(X,cw,lw,nf);
+  return arc_dudi(X,cw,lw,nf);
 }
-
-
+//[[Rcpp::export]]
+List arc_coa(arma::mat X,int nf){
+  int n,p,nf0;
+  n = X.n_rows;
+  p = X.n_cols;
+  nf0=nf-1;
+  double sumX = accu(X);
+  arma::vec pi = sum(X,1)/sumX;
+  arma::vec pj = sum(X.t(),1)/sumX;
+  arma::mat pij = X/sumX;
+  arma::mat Dj = diagmat(1/pj);
+  arma::mat Di = diagmat(1/pi);
+  arma::mat Z = Di*pij;
+  Z = Z*Dj;
+  Z = Z - 1;
+  return arc_dudi(Z,pj,pi,nf);
+}
+//[[Rcpp::export]]
+List arc_mca_proto(arma::mat X,arma::vec lw,double v, int nf){
+  int n,p,nf0;
+  n = X.n_rows;
+  p = X.n_cols;
+  nf0=nf-1;
+  arma::mat mat1 = ones(n,1);
+  arma::mat D = diagmat(lw);
+  arma::vec cw = X.t()*D*mat1;
+  //arma::mat Dm = X*diagmat(cw);
+  arma::mat Z = (X*diagmat(1/cw))-1;
+  cw = cw/v;
+  return arc_dudi(Z,cw,lw,nf);
+}
+//[[Rcpp::export]]
+arma::mat arc_acmutil(arma::vec x){
+  int i,j,n,p;
+  n = x.n_elem;
+  arma::vec unic = unique(x);
+  p = unic.n_elem;
+  arma::mat X=zeros(n,p);
+  for(i=0;i<n;i++){
+    for(j=0;j<p;j++){
+      if(x(i)==unic(j)){
+        X(i,j)=1.0;
+      }
+    }
+  }
+  return(X);
+}
+//[[Rcpp::export]]
+arma::mat arc_disjonctif(arma::mat X){
+  int i,n,p;  
+  n = X.n_rows;
+  p = X.n_cols;
+  arma::mat Xdis;
+  for(i=0;i<p;i++){
+    Xdis = join_horiz(Xdis,arc_acmutil(X.col(i)));
+    }
+  return Xdis;
+}
+//[[Rcpp::export]]
+List arc_mca(arma::mat X,arma::vec lw, int nf){
+  int n,v,nf0;
+  n = X.n_rows;
+  v = X.n_cols;
+  nf0=nf-1;
+  arma::mat Xdis = arc_disjonctif(X);
+  arma::mat mat1 = ones(n,1);
+  arma::mat D = diagmat(lw);
+  arma::vec cw = Xdis.t()*D*mat1;
+  //arma::mat Dm = Xdis*diagmat(cw);
+  arma::mat Z = (Xdis*diagmat(1/cw))-1;
+  cw = cw/v;
+  return arc_dudi(Z,cw,lw,nf);
+}
