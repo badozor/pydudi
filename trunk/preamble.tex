@@ -1,0 +1,24 @@
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage{graphicx}
+% \usepackage{fancyvrb}
+% \usepackage{amsmath}
+% \usepackage{color}
+% \usepackage{float}
+% \usepackage{hyperref}
+
+
+%\SweaveOpts{concordance=TRUE}
+\definecolor{Soutput}{rgb}{0,0,0.56}
+\definecolor{Sinput}{rgb}{0.56,0,0}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}
+{formatcom={\color{Sinput}},fontsize=\footnotesize, baselinestretch=0.75}
+\DefineVerbatimEnvironment{Soutput}{Verbatim}
+{formatcom={\color{Soutput}},fontsize=\footnotesize, baselinestretch=0.75}
+% Code de Duncan Murdoch post sur R-help le 07-MARS-2008 :
+% This removes the extra spacing after code and output chunks in Sweave,
+% but keeps the spacing around the whole block.
+\DefineVerbatimEnvironment{GenericCode}{Verbatim}
+{fontsize=\footnotesize, baselinestretch=0.75,frame=single}
+\fvset{listparameters={\setlength{\topsep}{0pt}}}
+\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
