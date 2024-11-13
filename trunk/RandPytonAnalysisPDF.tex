@@ -128,7 +128,7 @@
 \title{\textbf{Working Notes:} Data Analysis with R, Python and Rcpp
 (version 0.999)}
 \author{\textbf{P.BADY}}
-\date{Date: 2024-02-26}
+\date{Date: 2024-03-21}
 
 \begin{document}
 \maketitle
@@ -146,7 +146,7 @@
 \item
   \textbf{Date:} `2024-02-26'
 \item
-  \textbf{Revision:} Mon Feb 26 14:56:28 2024
+  \textbf{Revision:} Thu Mar 21 16:01:17 2024
 \item
   \textbf{Abstract:}
 \end{itemize}
@@ -1990,6 +1990,231 @@ encoding \textbf{disjonctif} table
 
 \includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-70-1.pdf}
 
+\hypertarget{multifactorial-analysis-based-on-gpu-computation-with-r}{%
+\section{Multifactorial analysis based on GPU computation with
+R}\label{multifactorial-analysis-based-on-gpu-computation-with-r}}
+
+R packages \textbf{GPUmatrix} and \textbf{torch}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{library(GPUmatrix)}
+\NormalTok{library(torch)}
+\NormalTok{library(ade4)}
+
+\NormalTok{as.dudi.gpu \textless{}{-} function (df, col.w, row.w, scannf, nf, call, type, tol = 1e{-}07, }
+\NormalTok{    full = FALSE)\{}
+\NormalTok{    if (!is.data.frame(df)) }
+\NormalTok{        stop("data.frame expected")}
+\NormalTok{    lig \textless{}{-} nrow(df)}
+\NormalTok{    col \textless{}{-} ncol(df)}
+\NormalTok{    if (length(col.w) != col) }
+\NormalTok{        stop("Non convenient col weights")}
+\NormalTok{    if (length(row.w) != lig) }
+\NormalTok{        stop("Non convenient row weights")}
+\NormalTok{    if (any(col.w \textless{} 0)) }
+\NormalTok{        stop("col weight \textless{} 0")}
+\NormalTok{    if (any(row.w \textless{} 0)) }
+\NormalTok{        stop("row weight \textless{} 0")}
+\NormalTok{    if (full) }
+\NormalTok{        scannf \textless{}{-} FALSE}
+\NormalTok{    transpose \textless{}{-} FALSE}
+\NormalTok{    if (lig \textless{} col) }
+\NormalTok{        transpose \textless{}{-} TRUE}
+\NormalTok{    res \textless{}{-} list(tab = df, cw = col.w, lw = row.w)}
+\NormalTok{    df \textless{}{-} as.matrix(df)}
+\NormalTok{    df.ori \textless{}{-} df}
+\NormalTok{    df \textless{}{-} df * sqrt(row.w)}
+\NormalTok{    df \textless{}{-} sweep(df, 2, sqrt(col.w), "*")}
+\NormalTok{\#\#\#\# conversion matrix into gpu.matrix}
+\NormalTok{    df \textless{}{-} as.gpu.matrix(df)}
+\NormalTok{    if (!transpose) \{}
+\NormalTok{        df \textless{}{-} crossprod(df, df)}
+\NormalTok{    \}}
+\NormalTok{    else \{}
+\NormalTok{        df \textless{}{-} tcrossprod(df, df)}
+\NormalTok{    \}}
+\NormalTok{    eig0 \textless{}{-} eigen(df, symmetric = TRUE)}
+\NormalTok{    eig1 \textless{}{-} list(values = as.vector(Re(eig0$values)),}
+\NormalTok{                vectors=as.matrix(Re(eig0$vectors)))}
+\NormalTok{    eig \textless{}{-} eig1$values}
+\NormalTok{    rank \textless{}{-} sum((eig/eig[1]) \textgreater{} tol)}
+\NormalTok{\#\#\# end of GPU computation}
+\NormalTok{    if (scannf) \{}
+\NormalTok{        if (exists("ade4TkGUIFlag")) \{}
+\NormalTok{            nf \textless{}{-} ade4TkGUI::chooseaxes(eig, rank)}
+\NormalTok{        \}}
+\NormalTok{        else \{}
+\NormalTok{            barplot(eig[1:rank])}
+\NormalTok{            cat("Select the number of axes: ")}
+\NormalTok{            nf \textless{}{-} as.integer(readLines(n = 1))}
+\NormalTok{            messageScannf(call, nf)}
+\NormalTok{        \}}
+\NormalTok{    \}}
+\NormalTok{    if (nf \textless{}= 0) }
+\NormalTok{        nf \textless{}{-} 2}
+\NormalTok{    if (nf \textgreater{} rank) }
+\NormalTok{        nf \textless{}{-} rank}
+\NormalTok{    if (full) }
+\NormalTok{        nf \textless{}{-} rank}
+\NormalTok{    res$eig \textless{}{-} eig[1:rank]}
+\NormalTok{    res$rank \textless{}{-} rank}
+\NormalTok{    res$nf \textless{}{-} nf}
+\NormalTok{    col.w[which(col.w == 0)] \textless{}{-} 1}
+\NormalTok{    row.w[which(row.w == 0)] \textless{}{-} 1}
+\NormalTok{    dval \textless{}{-} sqrt(res$eig)[1:nf]}
+\NormalTok{    if (!transpose) \{}
+\NormalTok{        col.w \textless{}{-} 1/sqrt(col.w)}
+\NormalTok{        auxi \textless{}{-} eig1$vectors[, 1:nf] * col.w}
+\NormalTok{        auxi2 \textless{}{-} sweep(df.ori, 2, res$cw, "*")}
+\NormalTok{        auxi2 \textless{}{-} data.frame(auxi2 \%*\% auxi)}
+\NormalTok{        auxi \textless{}{-} data.frame(auxi)}
+\NormalTok{        names(auxi) \textless{}{-} paste("CS", (1:nf), sep = "")}
+\NormalTok{        row.names(auxi) \textless{}{-} make.unique(names(res$tab))}
+\NormalTok{        res$c1 \textless{}{-} auxi}
+\NormalTok{        names(auxi2) \textless{}{-} paste("Axis", (1:nf), sep = "")}
+\NormalTok{        row.names(auxi2) \textless{}{-} row.names(res$tab)}
+\NormalTok{        res$li \textless{}{-} auxi2}
+\NormalTok{        res$co \textless{}{-} sweep(res$c1, 2, dval, "*")}
+\NormalTok{        names(res$co) \textless{}{-} paste("Comp", (1:nf), sep = "")}
+\NormalTok{        res$l1 \textless{}{-} sweep(res$li, 2, dval, "/")}
+\NormalTok{        names(res$l1) \textless{}{-} paste("RS", (1:nf), sep = "")}
+\NormalTok{    \}}
+\NormalTok{    else \{}
+\NormalTok{        row.w \textless{}{-} 1/sqrt(row.w)}
+\NormalTok{        auxi \textless{}{-} eig1$vectors[, 1:nf] * row.w}
+\NormalTok{        auxi2 \textless{}{-} t(sweep(df.ori, 1, res$lw, "*"))}
+\NormalTok{        auxi2 \textless{}{-} data.frame(auxi2 \%*\% auxi)}
+\NormalTok{        auxi \textless{}{-} data.frame(auxi)}
+\NormalTok{        names(auxi) \textless{}{-} paste("RS", (1:nf), sep = "")}
+\NormalTok{        row.names(auxi) \textless{}{-} row.names(res$tab)}
+\NormalTok{        res$l1 \textless{}{-} auxi}
+\NormalTok{        names(auxi2) \textless{}{-} paste("Comp", (1:nf), sep = "")}
+\NormalTok{        row.names(auxi2) \textless{}{-} make.unique(names(res$tab))}
+\NormalTok{        res$co \textless{}{-} auxi2}
+\NormalTok{        res$li \textless{}{-} sweep(res$l1, 2, dval, "*")}
+\NormalTok{        names(res$li) \textless{}{-} paste("Axis", (1:nf), sep = "")}
+\NormalTok{        res$c1 \textless{}{-} sweep(res$co, 2, dval, "/")}
+\NormalTok{        names(res$c1) \textless{}{-} paste("CS", (1:nf), sep = "")}
+\NormalTok{    \}}
+\NormalTok{    res$call \textless{}{-} call}
+\NormalTok{    class(res) \textless{}{-} c(type, "dudi")}
+\NormalTok{    return(res)}
+\NormalTok{\}}
+
+\NormalTok{dudi.pca.gpu \textless{}{-} function (df, row.w = rep(1, nrow(df))/nrow(df), col.w = rep(1, }
+\NormalTok{    ncol(df)), center = TRUE, scale = TRUE, scannf = TRUE, nf = 2)\{}
+\NormalTok{    df \textless{}{-} as.data.frame(df)}
+\NormalTok{    nc \textless{}{-} ncol(df)}
+\NormalTok{    if (any(is.na(df))) }
+\NormalTok{        stop("na entries in table")}
+\NormalTok{    f1 \textless{}{-} function(v) sum(v * row.w)/sum(row.w)}
+\NormalTok{    f2 \textless{}{-} function(v) sqrt(sum(v * v * row.w)/sum(row.w))}
+\NormalTok{    if (is.logical(center)) \{}
+\NormalTok{        if (center) \{}
+\NormalTok{            center \textless{}{-} apply(df, 2, f1)}
+\NormalTok{            df \textless{}{-} sweep(df, 2, center)}
+\NormalTok{        \}}
+\NormalTok{        else center \textless{}{-} rep(0, nc)}
+\NormalTok{    \}}
+\NormalTok{    else if (is.numeric(center) \&\& (length(center) == nc)) }
+\NormalTok{        df \textless{}{-} sweep(df, 2, center)}
+\NormalTok{    else stop("Non convenient selection for center")}
+\NormalTok{    if (scale) \{}
+\NormalTok{        norm \textless{}{-} apply(df, 2, f2)}
+\NormalTok{        norm[norm \textless{} 1e{-}08] \textless{}{-} 1}
+\NormalTok{        df \textless{}{-} sweep(df, 2, norm, "/")}
+\NormalTok{    \}}
+\NormalTok{    else norm \textless{}{-} rep(1, nc)}
+\NormalTok{    X \textless{}{-} as.dudi.gpu(df, col.w, row.w, scannf = scannf, nf = nf, }
+\NormalTok{        call = match.call(), type = "pca")}
+\NormalTok{    X$cent \textless{}{-} center}
+\NormalTok{    X$norm \textless{}{-} norm}
+\NormalTok{    X}
+\NormalTok{\}}
+
+
+\NormalTok{\#\#\#\# test}
+\NormalTok{data(deug)}
+\NormalTok{dudi1 \textless{}{-} dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)}
+\NormalTok{dudi2 \textless{}{-} dudi.pca.gpu(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)}
+\end{Highlighting}
+\end{Shaded}
+
+test with linear algebric functions from the R package \textbf{torch}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{library(torch)}
+\NormalTok{apropos("linalg")}
+\NormalTok{\#  [1] "linalg\_cholesky"            "linalg\_cholesky\_ex"         "linalg\_cond"                "linalg\_det"                }
+\NormalTok{\#  [5] "linalg\_eig"                 "linalg\_eigh"                "linalg\_eigvals"             "linalg\_eigvalsh"           }
+\NormalTok{\#  [9] "linalg\_householder\_product" "linalg\_inv"                 "linalg\_inv\_ex"              "linalg\_lstsq"              }
+\NormalTok{\# [13] "linalg\_matrix\_norm"         "linalg\_matrix\_power"        "linalg\_matrix\_rank"         "linalg\_multi\_dot"          }
+\NormalTok{\# [17] "linalg\_norm"                "linalg\_pinv"                "linalg\_qr"                  "linalg\_slogdet"            }
+\NormalTok{\# [21] "linalg\_solve"               "linalg\_svd"                 "linalg\_svdvals"             "linalg\_tensorinv"          }
+\NormalTok{\# [25] "linalg\_tensorsolve"         "linalg\_vector\_norm"  }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{multifactorial-analysis-based-on-gpu-computation-with-python}{%
+\section{Multifactorial analysis based on GPU computation with
+Python}\label{multifactorial-analysis-based-on-gpu-computation-with-python}}
+
+In this section, the library \textbf{cupy} (\url{https://cupy.dev/}) is
+used to implement the duality diagram.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{import os}
+\NormalTok{import string}
+\NormalTok{import re}
+\NormalTok{import pandas as pd}
+\NormalTok{import numpy as np}
+\NormalTok{import cupy as cu}
+
+\NormalTok{def cupydudi(X,cw,lw,nf):}
+\NormalTok{  dim = X.shape}
+\NormalTok{  n = dim[0]}
+\NormalTok{  p = dim[1]}
+\NormalTok{  nf0 = nf{-}1}
+\NormalTok{  \# n=len(X)}
+\NormalTok{  \# p=len(X.columns)}
+\NormalTok{  D = cu.diag(cu.sqrt(lw))}
+\NormalTok{  Q = cu.diag(cu.sqrt(cw))}
+  
+\NormalTok{  \# XtDXQ =\textgreater{} problem  with Q !!!}
+  
+\NormalTok{  XD = cu.dot(X.T,D).T}
+\NormalTok{  XD = cu.dot(XD,Q)}
+\NormalTok{  XtX = cu.dot(XD.T,XD)}
+  
+  
+\NormalTok{  \# decomposition}
+\NormalTok{  eigenvalues, eigenvectors = cu.linalg.eig(XtX)}
+\NormalTok{  index = cu.argsort(eigenvalues)[::{-}1]}
+  
+\NormalTok{  \# np.nonzero(eigenvalues)[0]}
+\NormalTok{  eigenvalues = eigenvalues.real}
+\NormalTok{  eigenvectors = eigenvectors.real}
+\NormalTok{  eigenvalues=eigenvalues[index]}
+\NormalTok{  eigenvectors=eigenvectors[:,index]}
+\NormalTok{  \# results}
+\NormalTok{  rank = len(cu.nonzero(eigenvalues)[0])}
+\NormalTok{  C1 = cu.dot(cu.diag(1/cu.sqrt(cw)),eigenvectors[:,0:nf])}
+\NormalTok{  \#C1 = eigenvectors[:,0:nf]}
+\NormalTok{  XQ = cu.dot(X,cu.diag(cw))}
+\NormalTok{  Li = cu.dot(XQ, C1)}
+  
+\NormalTok{  \# need to adjust the weighting (problem with sqrt)}
+\NormalTok{  L1 = cu.dot(Li,cu.diag(1/cu.sqrt(eigenvalues[0:nf])))}
+\NormalTok{  Co = cu.dot(C1,cu.diag(cu.sqrt(eigenvalues[0:nf])))}
+\NormalTok{  return eigenvalues,rank,Li,L1,Co,C1,nf;}
+
+\NormalTok{\#\#\#}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{references}{%
 \section{References}\label{references}}
 
@@ -2062,7 +2287,7 @@ encoding \textbf{disjonctif} table
 \end{Shaded}
 
 \begin{verbatim}
-## R version 4.3.2 (2023-10-31)
+## R version 4.3.3 (2024-02-29)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## Running under: Linux Mint 20.3
 ## 
@@ -2096,7 +2321,7 @@ encoding \textbf{disjonctif} table
 ##   [7] BiocIO_1.10.0             zlibbioc_1.46.0           vctrs_0.6.2              
 ##  [10] multtest_2.56.0           memoise_2.0.1             Rsamtools_2.16.0         
 ##  [13] DelayedMatrixStats_1.22.0 RCurl_1.98-1.12           askpass_1.1              
-##  [16] htmltools_0.5.5           S4Arrays_1.0.1            progress_1.2.2           
+##  [16] htmltools_0.5.5           S4Arrays_1.0.1            progress_1.2.3           
 ##  [19] curl_5.0.0                rjags_4-14                Rhdf5lib_1.22.0          
 ##  [22] rhdf5_2.44.0              nor1mix_1.3-0             plyr_1.8.8               
 ##  [25] cachem_1.0.8              GenomicAlignments_1.36.0  lifecycle_1.0.3          
@@ -2105,18 +2330,18 @@ encoding \textbf{disjonctif} table
 ##  [34] colorspace_2.1-0          siggenes_1.74.0           reshape_0.8.9            
 ##  [37] AnnotationDbi_1.62.1      rprojroot_2.0.3           RSQLite_2.3.1            
 ##  [40] base64_2.0.1              filelock_1.0.2            fansi_1.0.4              
-##  [43] httr_1.4.6                compiler_4.3.2            beanplot_1.3.1           
+##  [43] httr_1.4.6                compiler_4.3.3            beanplot_1.3.1           
 ##  [46] here_1.0.1                rngtools_1.5.2            bit64_4.0.5              
 ##  [49] BiocParallel_1.34.1       DBI_1.1.3                 highr_0.10               
 ##  [52] HDF5Array_1.28.1          biomaRt_2.56.0            MASS_7.3-60              
 ##  [55] openssl_2.0.6             rappdirs_0.3.3            DelayedArray_0.26.2      
 ##  [58] rjson_0.2.21              glue_1.6.2                quadprog_1.5-8           
 ##  [61] restfulr_0.0.15           nlme_3.1-162              rhdf5filters_1.12.1      
-##  [64] grid_4.3.2                generics_0.1.3            gtable_0.3.3             
+##  [64] grid_4.3.3                generics_0.1.3            gtable_0.3.3             
 ##  [67] tzdb_0.3.0                preprocessCore_1.62.1     tidyr_1.3.0              
 ##  [70] data.table_1.14.8         hms_1.1.3                 xml2_1.3.4               
 ##  [73] utf8_1.2.3                pillar_1.9.0              stringr_1.5.0            
-##  [76] limma_3.56.1              genefilter_1.82.1         splines_4.3.2            
+##  [76] limma_3.56.1              genefilter_1.82.1         splines_4.3.3            
 ##  [79] dplyr_1.1.2               BiocFileCache_2.8.0       lattice_0.21-8           
 ##  [82] survival_3.5-5            bit_4.0.5                 GEOquery_2.68.0          
 ##  [85] annotate_1.78.0           tidyselect_1.2.0          xfun_0.39                
