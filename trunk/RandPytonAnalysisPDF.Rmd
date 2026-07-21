@@ -88,7 +88,7 @@ options(encoding="UTF-8",prompt="  ", continue=" ",width = 85)
 options(show.signif.stars=TRUE)
 # non permanent command
 #load("/export/scratch2/data/TumorGrowth/.RData")
-source("/export/scratch/Rplus/Rutility.R")
+source("/export/scratch2/Rplus/Rutility.R")
 library(xtable)
 options(xtable.floating = FALSE)
 options(xtable.timestamp = "")
@@ -109,15 +109,12 @@ RequirePB <- function(...){
 SourcePB <- function(...){
   suppressPackageStartupMessages(source(...)) 
 }
-SourcePB('/export/scratch/GITprojectsOLD/methyltools/trunk/Rcode/preprocessFunnormv2.R')
-SourcePB("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R")
-SourcePB("/export/scratch/GITprojectsOLD/statstools/trunk/Rcode/graphics-0.1.R")
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
 ### additional personal functions
-SourcePB("/export/scratch/Rplus/Rutility.R")
+SourcePB("/export/scratch2/Rplus/Rutility.R")
 FigNB <- 0
 FigCaption <- function(x){
   FigNB <<- FigNB +1
@@ -1351,6 +1348,7 @@ constrcution nof the archive (deprecated!!!)
 python setup.py sdist bdist_wheel
 ```
 
+it's recommanded to use the following code (see: https://blog.stephane-robert.info/docs/developper/programmation/python/modules/)
 
 ```
 pip install build twine
