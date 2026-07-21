@@ -1,0 +1,11 @@
+setup.py
+pydudi/Ktab.py
+pydudi/__init__.py
+pydudi/pyACM.py
+pydudi/pyCOA.py
+pydudi/pyDudi.py
+pydudi/pyPCA.py
+pydudi.egg-info/PKG-INFO
+pydudi.egg-info/SOURCES.txt
+pydudi.egg-info/dependency_links.txt
+pydudi.egg-info/top_level.txt

@@ -87,7 +87,7 @@ library(tinytex)
 options(encoding="UTF-8",prompt="  ", continue=" ",width = 85)
 options(show.signif.stars=TRUE)
 # non permanent command
-load("/export/scratch2/data/TumorGrowth/.RData")
+#load("/export/scratch2/data/TumorGrowth/.RData")
 source("/export/scratch/Rplus/Rutility.R")
 library(xtable)
 options(xtable.floating = FALSE)
