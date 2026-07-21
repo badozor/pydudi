@@ -978,7 +978,7 @@ see https://jaredlander.com/content/2021/09/GPUComputingWithR.html#35
 
 R packages **GPUmatrix** and **torch**
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 library(GPUmatrix)
 library(torch)
 library(ade4)
