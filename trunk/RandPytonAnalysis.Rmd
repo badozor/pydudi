@@ -691,6 +691,42 @@ mca1 = pyACM(ours)
 ```
 
 
+## Generate Python package called pydudi
+
+
+construction of the file called 'setup.py' in the folder
+```
+from setuptools import setup, find_packages
+setup(
+    name='pydudi',
+    version='1.0',
+    packages=find_packages(),
+    description='Implementation Test of the duality diagram based on ade4 works',
+    author='Pierre Bady',
+    author_email='pierre.bady@gmail.com',
+    install_requires=[],
+)
+```
+
+contruction of the file "__init__.py" in the subfolder
+```
+__all__ = ["Ktab","pyACM","pyCOA","pyDudi","pyPCA"]
+```
+
+
+constrcution nof the archive (deprecated!!!)
+```
+python setup.py sdist bdist_wheel
+```
+
+it's recommanded to use the following code (see: https://blog.stephane-robert.info/docs/developper/programmation/python/modules/)
+
+```
+pip install build twine
+python -m build          # ou : uv build
+twine upload dist/*      # authentification par jeton API PyPI
+```
+
 
 
 # Construction of the function dudi in Rcpp
@@ -964,12 +1000,6 @@ plot(test$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (Axis 1)
 
 ***
 
-
-## Additional R functions
-
-```{r}
-source("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R")
-```
 
 ## Session information
 
