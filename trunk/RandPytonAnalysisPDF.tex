@@ -1,11 +1,13 @@
 % Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
-%
 \documentclass[
   10pt,
 ]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -36,8 +38,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\usepackage[margin=1in]{geometry}
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -80,27 +80,28 @@
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{5}
 \usepackage{titling}
 
 \pretitle{%
   \begin{center}
   \LARGE
-    \includegraphics[width=1cm]{/export/scratch/Rplus/Rlogo.png}
+    \includegraphics[width=1cm]{/export/scratch2/Rplus/Rlogo.png}
 }
 \posttitle{\end{center}}
 
@@ -113,14 +114,11 @@
 \rhead{Tumor size progression in LGG population}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Working Notes: Data Analysis with R, Python and Rcpp (version 0.999)},
+  pdftitle={Working Notes: Data Analysis with R{,} Python and Rcpp (version 0.999)},
   pdfauthor={P.BADY},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
@@ -128,7 +126,7 @@
 \title{\textbf{Working Notes:} Data Analysis with R, Python and Rcpp
 (version 0.999)}
 \author{\textbf{P.BADY}}
-\date{Date: 2024-03-21}
+\date{Date: 2026-07-21}
 
 \begin{document}
 \maketitle
@@ -146,7 +144,7 @@
 \item
   \textbf{Date:} `2024-02-26'
 \item
-  \textbf{Revision:} Thu Mar 21 16:01:17 2024
+  \textbf{Revision:} Tue Jul 21 14:51:34 2026
 \item
   \textbf{Abstract:}
 \end{itemize}
@@ -194,21 +192,18 @@ GNU General Public License for more details.
 \definecolor{Soutput}{rgb}{0,0,0.56}
 \definecolor{Sinput}{rgb}{0.56,0,0}
 
-\hypertarget{motivations}{%
-\section{Motivations}\label{motivations}}
+\section{Motivations}\label{motivations}
 
 The objective of this document is to propose an implementation of data
 analysis methods based on duality diagram in python and to develop and
 expand my skill in python. The document contains information related to
 the use of Rcpp (R and C++).
 
-\hypertarget{first-test-pca-based-on-r-package-ade4}{%
 \section{first test PCA based on R package
-ade4}\label{first-test-pca-based-on-r-package-ade4}}
+ade4}\label{first-test-pca-based-on-r-package-ade4}
 
-\hypertarget{example-from-the-r-package-ade4}{%
 \subsection{Example from the R package
-ade4}\label{example-from-the-r-package-ade4}}
+ade4}\label{example-from-the-r-package-ade4}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -228,8 +223,7 @@ reticulate (\url{https://rstudio.github.io/reticulate/}).
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{data-importation}{%
-\subsection{Data importation}\label{data-importation}}
+\subsection{Data importation}\label{data-importation}
 
 see for example:
 \url{https://www.kaggle.com/code/arnopub/pandas-pr-sentation-des-dataframe}
@@ -284,8 +278,7 @@ see for example:
 ## [104 rows x 9 columns]
 \end{verbatim}
 
-\hypertarget{pca-from-scratch-in-python}{%
-\section{PCA from scratch in python}\label{pca-from-scratch-in-python}}
+\section{PCA from scratch in python}\label{pca-from-scratch-in-python}
 
 PCA from scratch
 (\url{https://towardsdatascience.com/principal-component-analysis-from-scratch-in-numpy-61843da1f967})
@@ -311,10 +304,10 @@ PCA from scratch
 \end{Shaded}
 
 \begin{verbatim}
-## Algebra      -1.024821e-16
+## Algebra      -9.394195e-17
 ## Analysis      3.928481e-16
-## Proba        -1.216975e-16
-## Informatic   -1.708035e-16
+## Proba        -1.003471e-16
+## Informatic   -1.579933e-16
 ## Economy       4.782499e-16
 ## Option1      -1.281027e-17
 ## Option2       1.814788e-16
@@ -397,7 +390,7 @@ Calculate the proportion of variance explained by each feature
 \end{Shaded}
 
 \begin{verbatim}
-## 8.999999999999996
+## 9.000000000000002
 \end{verbatim}
 
 \begin{Shaded}
@@ -432,32 +425,15 @@ Plot scree plot from PCA
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-8-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-8-1.pdf}}
 
-\hypertarget{collaboration-r-and-python}{%
-\section{Collaboration R and python}\label{collaboration-r-and-python}}
+\section{Collaboration R and python}\label{collaboration-r-and-python}
 
 \url{https://rstudio.github.io/reticulate/}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{library(reticulate)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## Attachement du package : 'reticulate'
-\end{verbatim}
-
-\begin{verbatim}
-## L'objet suivant est masqué depuis 'package:rtracklayer':
-## 
-##     import
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \NormalTok{library(ade4)}
 \NormalTok{P \textless{}{-} py$P}
 \NormalTok{colnames(P) \textless{}{-} paste("Axis",1:ncol(P),sep="")}
@@ -472,7 +448,7 @@ Plot scree plot from PCA
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-9-3.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-9-3.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -489,7 +465,7 @@ Plot scree plot from PCA
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-10-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-10-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -502,7 +478,7 @@ Plot scree plot from PCA
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-11-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-11-1.pdf}}
 
 problem in the order of the eigenvalues !!!
 
@@ -608,9 +584,8 @@ test of the pca from scikit-learn
 ##  0.53254143 0.43753953 0.28477539]
 \end{verbatim}
 
-\hypertarget{construction-of-the-function-pydudi-first-prototype}{%
 \section{Construction of the function ``pydudi'' (first
-prototype)}\label{construction-of-the-function-pydudi-first-prototype}}
+prototype)}\label{construction-of-the-function-pydudi-first-prototype}
 
 based on the duality diagram (see more details below)
 
@@ -676,8 +651,7 @@ first test =\textgreater{} need to adjust the weighting (test with COA)
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{test-pydudi-with-pca}{%
-\subsection{Test pydudi with PCA}\label{test-pydudi-with-pca}}
+\subsection{Test pydudi with PCA}\label{test-pydudi-with-pca}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -760,7 +734,7 @@ first test =\textgreater{} need to adjust the weighting (test with COA)
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-16-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-16-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -775,7 +749,7 @@ first test =\textgreater{} need to adjust the weighting (test with COA)
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-17-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-17-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -789,10 +763,9 @@ first test =\textgreater{} need to adjust the weighting (test with COA)
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-18-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-18-1.pdf}}
 
-\hypertarget{test-pydudi-with-coa}{%
-\subsection{Test pydudi with COA}\label{test-pydudi-with-coa}}
+\subsection{Test pydudi with COA}\label{test-pydudi-with-coa}
 
 COA: correspondence analysis.
 
@@ -1014,7 +987,7 @@ Si R help from ade4 (dudi.coa) and
 ## [36]  3.720553e-02  3.442061e-02  3.171369e-02  2.925675e-02  2.716217e-02
 ## [41]  2.638621e-02  2.209235e-02  2.108982e-02  2.051741e-02  1.678603e-02
 ## [46]  1.606633e-02  1.547672e-02  1.446357e-02  1.299122e-02  8.353461e-03
-## [51] -1.171126e-16
+## [51] -1.964766e-17
 \end{verbatim}
 
 ok for the eigenvalues, probleme dans le calcul des coordonnées ???
@@ -1032,7 +1005,7 @@ ok for the eigenvalues, probleme dans le calcul des coordonnées ???
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-27-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-27-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1047,7 +1020,7 @@ ok for the eigenvalues, probleme dans le calcul des coordonnées ???
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-28-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-28-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1061,12 +1034,11 @@ ok for the eigenvalues, probleme dans le calcul des coordonnées ???
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-29-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-29-1.pdf}}
 
 =\textgreater{} need to check the weight !!! =\textgreater{} Ok !!
 
-\hypertarget{test-pydudi-with-mca}{%
-\subsection{Test pydudi with MCA}\label{test-pydudi-with-mca}}
+\subsection{Test pydudi with MCA}\label{test-pydudi-with-mca}
 
 MCA: Multiple Correspondence Analysis
 
@@ -1271,7 +1243,7 @@ preparation of the triplet
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-36-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-36-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1286,7 +1258,7 @@ preparation of the triplet
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-37-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-37-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1300,10 +1272,9 @@ preparation of the triplet
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-38-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-38-1.pdf}}
 
-\hypertarget{class-and-object-dudi}{%
-\section{Class and object dudi}\label{class-and-object-dudi}}
+\section{Class and object dudi}\label{class-and-object-dudi}
 
 define the structure of the object and description of the elements based
 on object `dudi' from R package ade4 (and ADE-4):
@@ -1342,9 +1313,8 @@ heritage for the PCA and COA (and other methods):
   and specific elements
 \end{itemize}
 
-\hypertarget{object-dudi}{%
 \subsection{\texorpdfstring{Object
-\textbf{Dudi}}{Object Dudi}}\label{object-dudi}}
+\textbf{Dudi}}{Object Dudi}}\label{object-dudi}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1399,8 +1369,7 @@ heritage for the PCA and COA (and other methods):
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{test-pour-pca}{%
-\subsection{test pour PCA}\label{test-pour-pca}}
+\subsection{test pour PCA}\label{test-pour-pca}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1427,8 +1396,7 @@ heritage for the PCA and COA (and other methods):
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{test-pour-coa}{%
-\subsection{test pour COA}\label{test-pour-coa}}
+\subsection{test pour COA}\label{test-pour-coa}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1456,8 +1424,7 @@ heritage for the PCA and COA (and other methods):
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{test-pour-acm}{%
-\subsection{test pour ACM}\label{test-pour-acm}}
+\subsection{test pour ACM}\label{test-pour-acm}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1490,17 +1457,63 @@ heritage for the PCA and COA (and other methods):
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{construction-of-the-function-dudi-in-rcpp}{%
-\section{Construction of the function dudi in
-Rcpp}\label{construction-of-the-function-dudi-in-rcpp}}
+\section{Generate Python package called
+pydudi}\label{generate-python-package-called-pydudi}
 
-\hypertarget{test-rcpp-correlation-between-two-variables}{%
+construction of the file called `setup.py' in the folder
+
+\begin{verbatim}
+from setuptools import setup, find_packages
+setup(
+    name='pydudi',
+    version='1.0',
+    packages=find_packages(),
+    description='Implementation Test of the duality diagram based on ade4 works',
+    author='Pierre Bady',
+    author_email='pierre.bady@gmail.com',
+    install_requires=[],
+)
+\end{verbatim}
+
+contruction of the file ``\textbf{init}.py'' in the subfolder
+
+\begin{verbatim}
+__all__ = ["Ktab","pyACM","pyCOA","pyDudi","pyPCA"]
+\end{verbatim}
+
+constrcution nof the archive (deprecated!!!)
+
+\begin{verbatim}
+python setup.py sdist bdist_wheel
+\end{verbatim}
+
+it's recommanded to use the following code (see:
+\url{https://blog.stephane-robert.info/docs/developper/programmation/python/modules/})
+
+\begin{verbatim}
+pip install build twine
+python -m build          # ou : uv build
+twine upload dist/*      # authentification par jeton API PyPI
+\end{verbatim}
+
+\section{Construction of the function dudi in
+Rcpp}\label{construction-of-the-function-dudi-in-rcpp}
+
 \subsection{Test Rcpp: correlation between two
-variables}\label{test-rcpp-correlation-between-two-variables}}
+variables}\label{test-rcpp-correlation-between-two-variables}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{require(parallel)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Le chargement a nécessité le package : parallel
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \NormalTok{require(Rcpp)}
 \end{Highlighting}
 \end{Shaded}
@@ -1551,8 +1564,7 @@ correlation coefficient
 
 computation of the area under curve
 
-\hypertarget{object-dudi-1}{%
-\subsection{Object dudi}\label{object-dudi-1}}
+\subsection{Object dudi}\label{object-dudi-1}
 
 dudi obect with Rcpparmadillo
 
@@ -1602,7 +1614,7 @@ dudi obect with Rcpparmadillo
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-50-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-50-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1617,7 +1629,7 @@ dudi obect with Rcpparmadillo
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-51-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-51-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1631,10 +1643,9 @@ dudi obect with Rcpparmadillo
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-52-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-52-1.pdf}}
 
-\hypertarget{test-pca}{%
-\subsection{Test PCA}\label{test-pca}}
+\subsection{Test PCA}\label{test-pca}
 
 argument for the function cpca:
 
@@ -1699,7 +1710,7 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-54-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-54-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1714,7 +1725,7 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-55-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-55-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1728,10 +1739,9 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-56-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-56-1.pdf}}
 
-\hypertarget{test-coa}{%
-\subsection{Test COA}\label{test-coa}}
+\subsection{Test COA}\label{test-coa}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1780,7 +1790,7 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-58-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-58-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1795,7 +1805,7 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-59-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-59-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1809,10 +1819,9 @@ argument for the function cpca:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-60-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-60-1.pdf}}
 
-\hypertarget{test-mca}{%
-\subsection{Test MCA}\label{test-mca}}
+\subsection{Test MCA}\label{test-mca}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1861,7 +1870,7 @@ the variable number.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-63-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-63-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1876,7 +1885,7 @@ the variable number.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-64-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-64-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1890,7 +1899,7 @@ the variable number.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-65-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-65-1.pdf}}
 
 encoding \textbf{disjonctif} table
 
@@ -1959,7 +1968,7 @@ encoding \textbf{disjonctif} table
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-68-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-68-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1974,7 +1983,7 @@ encoding \textbf{disjonctif} table
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-69-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-69-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1988,11 +1997,13 @@ encoding \textbf{disjonctif} table
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-70-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{RandPytonAnalysisPDF_files/RandPytonAnalysisPDF_files/figure-latex/unnamed-chunk-70-1.pdf}}
 
-\hypertarget{multifactorial-analysis-based-on-gpu-computation-with-r}{%
 \section{Multifactorial analysis based on GPU computation with
-R}\label{multifactorial-analysis-based-on-gpu-computation-with-r}}
+R}\label{multifactorial-analysis-based-on-gpu-computation-with-r}
+
+see
+\url{https://jaredlander.com/content/2021/09/GPUComputingWithR.html\#35}
 
 R packages \textbf{GPUmatrix} and \textbf{torch}
 
@@ -2157,9 +2168,8 @@ test with linear algebric functions from the R package \textbf{torch}:
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{multifactorial-analysis-based-on-gpu-computation-with-python}{%
 \section{Multifactorial analysis based on GPU computation with
-Python}\label{multifactorial-analysis-based-on-gpu-computation-with-python}}
+Python}\label{multifactorial-analysis-based-on-gpu-computation-with-python}
 
 In this section, the library \textbf{cupy} (\url{https://cupy.dev/}) is
 used to implement the duality diagram.
@@ -2215,8 +2225,53 @@ used to implement the duality diagram.
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{references}{%
-\section{References}\label{references}}
+\section{Future development for the Package
+pydudi}\label{future-development-for-the-package-pydudi}
+
+modification of the names used for the function (?)
+
+\begin{itemize}
+\tightlist
+\item
+  check names and use of the function
+\item
+  add acmutil function for the preparation of the Burt's table
+\end{itemize}
+
+implementation in python:
+
+\begin{itemize}
+\tightlist
+\item
+  class Ktab
+\item
+  function coinertia
+\item
+  function pls
+\item
+  function spls
+\item
+  function gpls
+\item
+  function mbpls
+\item
+  function smbpls
+\item
+  function statis
+\item
+  function mfa
+\item
+  function mcoa
+\item
+  function gpa
+\item
+  function coinertia
+\end{itemize}
+
+NOTA: The objective of this works is not to replace the R package ade4,
+but it's just a manner to improve my skill in python.
+
+\section{References}\label{references}
 
 \begin{itemize}
 \tightlist
@@ -2265,20 +2320,13 @@ used to implement the duality diagram.
   multidimensionnelle. Dunod, Paris.
 \end{itemize}
 
-\hypertarget{appendix}{%
-\section{Appendix}\label{appendix}}
+\section{Appendix}\label{appendix}
 
-\hypertarget{additional-r-functions}{%
-\subsection{Additional R functions}\label{additional-r-functions}}
+\subsection{Additional R functions}\label{additional-r-functions}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{source("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics{-}0.1.R")}
-\end{Highlighting}
-\end{Shaded}
+zzz
 
-\hypertarget{session-information}{%
-\subsection{Session information}\label{session-information}}
+\subsection{Session information}\label{session-information}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2287,73 +2335,31 @@ used to implement the duality diagram.
 \end{Shaded}
 
 \begin{verbatim}
-## R version 4.3.3 (2024-02-29)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Linux Mint 20.3
+## R version 4.6.0 (2026-04-24)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Linux Mint 21.3
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0  LAPACK version 3.10.0
 ## 
 ## attached base packages:
-##  [1] parallel  datasets  stats     graphics  utils     stats4    tools     grDevices
-##  [9] methods   base     
+## [1] parallel  graphics  datasets  utils     stats     tools     grDevices methods  
+## [9] base     
 ## 
 ## other attached packages:
-##  [1] RcppArmadillo_0.12.2.0.0    Rcpp_1.0.10                
-##  [3] reticulate_1.28             circlize_0.4.15            
-##  [5] minfi_1.46.0                bumphunter_1.42.0          
-##  [7] locfit_1.5-9.7              iterators_1.0.14           
-##  [9] foreach_1.5.2               Biostrings_2.68.0          
-## [11] XVector_0.40.0              SummarizedExperiment_1.30.1
-## [13] Biobase_2.60.0              MatrixGenerics_1.12.0      
-## [15] matrixStats_0.63.0          xtable_1.8-4               
-## [17] tinytex_0.45                rmarkdown_2.21             
-## [19] knitr_1.42                  pixmap_0.4-12              
-## [21] ade4_1.7-22                 RColorBrewer_1.1-3         
-## [23] rtracklayer_1.60.0          GenomicRanges_1.52.0       
-## [25] GenomeInfoDb_1.36.0         IRanges_2.34.0             
-## [27] S4Vectors_0.38.1            BiocGenerics_0.46.0        
+##  [1] RcppArmadillo_14.6.0-1 Rcpp_1.1.1-1.1         reticulate_1.46.0     
+##  [4] circlize_0.4.16        xtable_1.8-4           tinytex_0.57          
+##  [7] rmarkdown_2.31         knitr_1.51             pixmap_0.4-13         
+## [10] ade4_1.7-23            RColorBrewer_1.1-3    
 ## 
 ## loaded via a namespace (and not attached):
-##   [1] jsonlite_1.8.4            shape_1.4.6               rstudioapi_0.15.0        
-##   [4] magrittr_2.0.3            GenomicFeatures_1.52.0    GlobalOptions_0.1.2      
-##   [7] BiocIO_1.10.0             zlibbioc_1.46.0           vctrs_0.6.2              
-##  [10] multtest_2.56.0           memoise_2.0.1             Rsamtools_2.16.0         
-##  [13] DelayedMatrixStats_1.22.0 RCurl_1.98-1.12           askpass_1.1              
-##  [16] htmltools_0.5.5           S4Arrays_1.0.1            progress_1.2.3           
-##  [19] curl_5.0.0                rjags_4-14                Rhdf5lib_1.22.0          
-##  [22] rhdf5_2.44.0              nor1mix_1.3-0             plyr_1.8.8               
-##  [25] cachem_1.0.8              GenomicAlignments_1.36.0  lifecycle_1.0.3          
-##  [28] pkgconfig_2.0.3           Matrix_1.5-4              R6_2.5.1                 
-##  [31] fastmap_1.1.1             GenomeInfoDbData_1.2.10   digest_0.6.31            
-##  [34] colorspace_2.1-0          siggenes_1.74.0           reshape_0.8.9            
-##  [37] AnnotationDbi_1.62.1      rprojroot_2.0.3           RSQLite_2.3.1            
-##  [40] base64_2.0.1              filelock_1.0.2            fansi_1.0.4              
-##  [43] httr_1.4.6                compiler_4.3.3            beanplot_1.3.1           
-##  [46] here_1.0.1                rngtools_1.5.2            bit64_4.0.5              
-##  [49] BiocParallel_1.34.1       DBI_1.1.3                 highr_0.10               
-##  [52] HDF5Array_1.28.1          biomaRt_2.56.0            MASS_7.3-60              
-##  [55] openssl_2.0.6             rappdirs_0.3.3            DelayedArray_0.26.2      
-##  [58] rjson_0.2.21              glue_1.6.2                quadprog_1.5-8           
-##  [61] restfulr_0.0.15           nlme_3.1-162              rhdf5filters_1.12.1      
-##  [64] grid_4.3.3                generics_0.1.3            gtable_0.3.3             
-##  [67] tzdb_0.3.0                preprocessCore_1.62.1     tidyr_1.3.0              
-##  [70] data.table_1.14.8         hms_1.1.3                 xml2_1.3.4               
-##  [73] utf8_1.2.3                pillar_1.9.0              stringr_1.5.0            
-##  [76] limma_3.56.1              genefilter_1.82.1         splines_4.3.3            
-##  [79] dplyr_1.1.2               BiocFileCache_2.8.0       lattice_0.21-8           
-##  [82] survival_3.5-5            bit_4.0.5                 GEOquery_2.68.0          
-##  [85] annotate_1.78.0           tidyselect_1.2.0          xfun_0.39                
-##  [88] scrime_1.3.5              stringi_1.7.12            yaml_2.3.7               
-##  [91] evaluate_0.21             codetools_0.2-19          tibble_3.2.1             
-##  [94] cli_3.6.1                 munsell_0.5.0             dbplyr_2.3.2             
-##  [97] coda_0.19-4               png_0.1-8                 XML_3.99-0.14            
-## [100] ggplot2_3.4.2             readr_2.1.4               blob_1.2.4               
-## [103] prettyunits_1.1.1         mclust_6.0.0              doRNG_1.8.6              
-## [106] sparseMatrixStats_1.12.0  bitops_1.0-7              scales_1.2.1             
-## [109] illuminaio_0.42.0         purrr_1.0.1               crayon_1.5.2             
-## [112] rlang_1.1.1               KEGGREST_1.40.0
+##  [1] cli_3.6.5           rlang_1.3.0         xfun_0.52           otel_0.2.0         
+##  [5] png_0.1-8           jsonlite_2.0.0      colorspace_2.1-1    rprojroot_2.0.4    
+##  [9] htmltools_0.5.9     GlobalOptions_0.1.2 grid_4.6.0          evaluate_1.0.4     
+## [13] MASS_7.3-65         fastmap_1.2.0       yaml_2.3.10         compiler_4.6.0     
+## [17] here_1.0.1          rstudioapi_0.17.1   lattice_0.22-7      digest_0.6.37      
+## [21] shape_1.4.6.1       Matrix_1.7-5        withr_3.0.2
 \end{verbatim}
 
 \end{document}

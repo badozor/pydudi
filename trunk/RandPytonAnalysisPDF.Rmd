@@ -817,7 +817,41 @@ def pyACM(X,lw=None,nf=2):
 mca1 = pyACM(ours)
 ```
 
+# Generate Python package called pydudi
 
+
+construction of the file called 'setup.py' in the folder
+```
+from setuptools import setup, find_packages
+setup(
+    name='pydudi',
+    version='1.0',
+    packages=find_packages(),
+    description='Implementation Test of the duality diagram based on ade4 works',
+    author='Pierre Bady',
+    author_email='pierre.bady@gmail.com',
+    install_requires=[],
+)
+```
+
+contruction of the file "__init__.py" in the subfolder
+```
+__all__ = ["Ktab","pyACM","pyCOA","pyDudi","pyPCA"]
+```
+
+
+constrcution nof the archive (deprecated!!!)
+```
+python setup.py sdist bdist_wheel
+```
+
+it's recommanded to use the following code (see: https://blog.stephane-robert.info/docs/developper/programmation/python/modules/)
+
+```
+pip install build twine
+python -m build          # ou : uv build
+twine upload dist/*      # authentification par jeton API PyPI
+```
 
 
 # Construction of the function dudi in Rcpp
@@ -1319,43 +1353,30 @@ def cupydudi(X,cw,lw,nf):
 ###
 ```
 
-
-# Generate Python package called pydudi
-
-
-construction of the file called 'setup.py' in the folder
-```
-from setuptools import setup, find_packages
-setup(
-    name='pydudi',
-    version='1.0',
-    packages=find_packages(),
-    description='Implementation Test of the duality diagram based on ade4 works',
-    author='Pierre Bady',
-    author_email='pierre.bady@gmail.com',
-    install_requires=[],
-)
-```
-
-contruction of the file "__init__.py" in the subfolder
-```
-__all__ = ["Ktab","pyACM","pyCOA","pyDudi","pyPCA"]
-```
+# Future development for the Package pydudi
 
 
-constrcution nof the archive (deprecated!!!)
-```
-python setup.py sdist bdist_wheel
-```
+modification of the names used for the function (?)
 
-it's recommanded to use the following code (see: https://blog.stephane-robert.info/docs/developper/programmation/python/modules/)
+ * check names and use of the function
+ * add acmutil function for the preparation of the Burt's table
 
-```
-pip install build twine
-python -m build          # ou : uv build
-twine upload dist/*      # authentification par jeton API PyPI
-```
+implementation in python:
 
+ * class Ktab
+ * function coinertia
+ * function pls
+ * function spls
+ * function gpls
+ * function mbpls
+ * function smbpls
+ * function statis
+ * function mfa
+ * function mcoa
+ * function gpa
+ * function coinertia
+
+NOTA: The objective of this works is not to replace the R package ade4, but it's just a manner to improve my skill in python.
 
 
 # References
@@ -1380,9 +1401,8 @@ twine upload dist/*      # authentification par jeton API PyPI
 
 ## Additional R functions
 
-```{r}
-source("/export/scratch/GITprojects/pbtools/trunk/Rcode/Rgraphics-0.1.R")
-```
+zzz
+
 
 ## Session information
 

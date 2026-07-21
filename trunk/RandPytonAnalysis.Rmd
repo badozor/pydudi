@@ -972,7 +972,250 @@ plot(test$c1[,1],acm1$c1[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (normed 
 plot(test$co[,1],acm1$co[,1],panel.first=c(grid()),xlab="Rcpp-Armadillo (Axis 1)",ylab="R (Axis 1)",pch=19);abline(0,-1,col="red")
 ```
 
+# Multifactorial analysis based on GPU computation with R
 
+see https://jaredlander.com/content/2021/09/GPUComputingWithR.html#35
+
+R packages **GPUmatrix** and **torch**
+
+```{r eval=FALSE}
+library(GPUmatrix)
+library(torch)
+library(ade4)
+
+as.dudi.gpu <- function (df, col.w, row.w, scannf, nf, call, type, tol = 1e-07, 
+    full = FALSE){
+    if (!is.data.frame(df)) 
+        stop("data.frame expected")
+    lig <- nrow(df)
+    col <- ncol(df)
+    if (length(col.w) != col) 
+        stop("Non convenient col weights")
+    if (length(row.w) != lig) 
+        stop("Non convenient row weights")
+    if (any(col.w < 0)) 
+        stop("col weight < 0")
+    if (any(row.w < 0)) 
+        stop("row weight < 0")
+    if (full) 
+        scannf <- FALSE
+    transpose <- FALSE
+    if (lig < col) 
+        transpose <- TRUE
+    res <- list(tab = df, cw = col.w, lw = row.w)
+    df <- as.matrix(df)
+    df.ori <- df
+    df <- df * sqrt(row.w)
+    df <- sweep(df, 2, sqrt(col.w), "*")
+#### conversion matrix into gpu.matrix
+    df <- as.gpu.matrix(df)
+    if (!transpose) {
+        df <- crossprod(df, df)
+    }
+    else {
+        df <- tcrossprod(df, df)
+    }
+    eig0 <- eigen(df, symmetric = TRUE)
+    eig1 <- list(values = as.vector(Re(eig0$values)),
+                vectors=as.matrix(Re(eig0$vectors)))
+    eig <- eig1$values
+    rank <- sum((eig/eig[1]) > tol)
+### end of GPU computation
+    if (scannf) {
+        if (exists("ade4TkGUIFlag")) {
+            nf <- ade4TkGUI::chooseaxes(eig, rank)
+        }
+        else {
+            barplot(eig[1:rank])
+            cat("Select the number of axes: ")
+            nf <- as.integer(readLines(n = 1))
+            messageScannf(call, nf)
+        }
+    }
+    if (nf <= 0) 
+        nf <- 2
+    if (nf > rank) 
+        nf <- rank
+    if (full) 
+        nf <- rank
+    res$eig <- eig[1:rank]
+    res$rank <- rank
+    res$nf <- nf
+    col.w[which(col.w == 0)] <- 1
+    row.w[which(row.w == 0)] <- 1
+    dval <- sqrt(res$eig)[1:nf]
+    if (!transpose) {
+        col.w <- 1/sqrt(col.w)
+        auxi <- eig1$vectors[, 1:nf] * col.w
+        auxi2 <- sweep(df.ori, 2, res$cw, "*")
+        auxi2 <- data.frame(auxi2 %*% auxi)
+        auxi <- data.frame(auxi)
+        names(auxi) <- paste("CS", (1:nf), sep = "")
+        row.names(auxi) <- make.unique(names(res$tab))
+        res$c1 <- auxi
+        names(auxi2) <- paste("Axis", (1:nf), sep = "")
+        row.names(auxi2) <- row.names(res$tab)
+        res$li <- auxi2
+        res$co <- sweep(res$c1, 2, dval, "*")
+        names(res$co) <- paste("Comp", (1:nf), sep = "")
+        res$l1 <- sweep(res$li, 2, dval, "/")
+        names(res$l1) <- paste("RS", (1:nf), sep = "")
+    }
+    else {
+        row.w <- 1/sqrt(row.w)
+        auxi <- eig1$vectors[, 1:nf] * row.w
+        auxi2 <- t(sweep(df.ori, 1, res$lw, "*"))
+        auxi2 <- data.frame(auxi2 %*% auxi)
+        auxi <- data.frame(auxi)
+        names(auxi) <- paste("RS", (1:nf), sep = "")
+        row.names(auxi) <- row.names(res$tab)
+        res$l1 <- auxi
+        names(auxi2) <- paste("Comp", (1:nf), sep = "")
+        row.names(auxi2) <- make.unique(names(res$tab))
+        res$co <- auxi2
+        res$li <- sweep(res$l1, 2, dval, "*")
+        names(res$li) <- paste("Axis", (1:nf), sep = "")
+        res$c1 <- sweep(res$co, 2, dval, "/")
+        names(res$c1) <- paste("CS", (1:nf), sep = "")
+    }
+    res$call <- call
+    class(res) <- c(type, "dudi")
+    return(res)
+}
+
+dudi.pca.gpu <- function (df, row.w = rep(1, nrow(df))/nrow(df), col.w = rep(1, 
+    ncol(df)), center = TRUE, scale = TRUE, scannf = TRUE, nf = 2){
+    df <- as.data.frame(df)
+    nc <- ncol(df)
+    if (any(is.na(df))) 
+        stop("na entries in table")
+    f1 <- function(v) sum(v * row.w)/sum(row.w)
+    f2 <- function(v) sqrt(sum(v * v * row.w)/sum(row.w))
+    if (is.logical(center)) {
+        if (center) {
+            center <- apply(df, 2, f1)
+            df <- sweep(df, 2, center)
+        }
+        else center <- rep(0, nc)
+    }
+    else if (is.numeric(center) && (length(center) == nc)) 
+        df <- sweep(df, 2, center)
+    else stop("Non convenient selection for center")
+    if (scale) {
+        norm <- apply(df, 2, f2)
+        norm[norm < 1e-08] <- 1
+        df <- sweep(df, 2, norm, "/")
+    }
+    else norm <- rep(1, nc)
+    X <- as.dudi.gpu(df, col.w, row.w, scannf = scannf, nf = nf, 
+        call = match.call(), type = "pca")
+    X$cent <- center
+    X$norm <- norm
+    X
+}
+
+
+#### test
+data(deug)
+dudi1 <- dudi.pca(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
+dudi2 <- dudi.pca.gpu(deug$tab, center = TRUE, scale = TRUE, scan = FALSE)
+```
+
+
+test with linear algebric functions from the R package **torch**:
+```{r eval=FALSE}
+library(torch)
+apropos("linalg")
+#  [1] "linalg_cholesky"            "linalg_cholesky_ex"         "linalg_cond"                "linalg_det"                
+#  [5] "linalg_eig"                 "linalg_eigh"                "linalg_eigvals"             "linalg_eigvalsh"           
+#  [9] "linalg_householder_product" "linalg_inv"                 "linalg_inv_ex"              "linalg_lstsq"              
+# [13] "linalg_matrix_norm"         "linalg_matrix_power"        "linalg_matrix_rank"         "linalg_multi_dot"          
+# [17] "linalg_norm"                "linalg_pinv"                "linalg_qr"                  "linalg_slogdet"            
+# [21] "linalg_solve"               "linalg_svd"                 "linalg_svdvals"             "linalg_tensorinv"          
+# [25] "linalg_tensorsolve"         "linalg_vector_norm"  
+```
+
+
+
+
+# Multifactorial analysis based on GPU computation with Python
+
+In this section, the library **cupy** (https://cupy.dev/) is used to implement the duality diagram.
+
+```{python eval=FALSE}
+import os
+import string
+import re
+import pandas as pd
+import numpy as np
+import cupy as cu
+
+def cupydudi(X,cw,lw,nf):
+  dim = X.shape
+  n = dim[0]
+  p = dim[1]
+  nf0 = nf-1
+  # n=len(X)
+  # p=len(X.columns)
+  D = cu.diag(cu.sqrt(lw))
+  Q = cu.diag(cu.sqrt(cw))
+  
+  # XtDXQ => problem  with Q !!!
+  
+  XD = cu.dot(X.T,D).T
+  XD = cu.dot(XD,Q)
+  XtX = cu.dot(XD.T,XD)
+  
+  
+  # decomposition
+  eigenvalues, eigenvectors = cu.linalg.eig(XtX)
+  index = cu.argsort(eigenvalues)[::-1]
+  
+  # np.nonzero(eigenvalues)[0]
+  eigenvalues = eigenvalues.real
+  eigenvectors = eigenvectors.real
+  eigenvalues=eigenvalues[index]
+  eigenvectors=eigenvectors[:,index]
+  # results
+  rank = len(cu.nonzero(eigenvalues)[0])
+  C1 = cu.dot(cu.diag(1/cu.sqrt(cw)),eigenvectors[:,0:nf])
+  #C1 = eigenvectors[:,0:nf]
+  XQ = cu.dot(X,cu.diag(cw))
+  Li = cu.dot(XQ, C1)
+  
+  # need to adjust the weighting (problem with sqrt)
+  L1 = cu.dot(Li,cu.diag(1/cu.sqrt(eigenvalues[0:nf])))
+  Co = cu.dot(C1,cu.diag(cu.sqrt(eigenvalues[0:nf])))
+  return eigenvalues,rank,Li,L1,Co,C1,nf;
+
+###
+```
+
+
+# Future development for the Package pydudi
+
+
+modification of the names used for the function (?)
+
+ * check names and use of the function
+ * add acmutil function for the preparation of the Burt's table
+
+implementation in python:
+
+ * class Ktab
+ * function coinertia
+ * function pls
+ * function spls
+ * function gpls
+ * function mbpls
+ * function smbpls
+ * function statis
+ * function mfa
+ * function mcoa
+ * function gpa
+ * function coinertia
+
+NOTA: The objective of this works is not to replace the R package ade4, but it's just a manner to improve my skill in python.
 
 # References
 <a href="#top">Back to top</a>
