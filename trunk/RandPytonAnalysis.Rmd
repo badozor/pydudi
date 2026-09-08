@@ -1217,6 +1217,7 @@ implementation in python:
 
 NOTA: The objective of this works is not to replace the R package ade4, but it's just a manner to improve my skill in python.
 
+
 # References
 <a href="#top">Back to top</a>
 
