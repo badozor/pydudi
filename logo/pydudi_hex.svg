@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="600" viewBox="0 0 520 600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b7bbf"/>
+      <stop offset="1" stop-color="#1f4e79"/>
+    </linearGradient>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8DC63F"/>
+    </marker>
+  </defs>
+
+  <!-- hexagone -->
+  <polygon points="260,20 502.5,160 502.5,440 260,580 17.5,440 17.5,160" fill="#8DC63F"/>
+  <polygon points="260,38 486.9,169 486.9,431 260,562 33.1,431 33.1,169" fill="url(#bg)"/>
+
+  <!-- nuage de points discret en fond -->
+  <g fill="#ffffff" opacity="0.12">
+    <circle cx="95" cy="215" r="5"/><circle cx="400" cy="300" r="6"/><circle cx="140" cy="390" r="4"/>
+    <circle cx="390" cy="200" r="4"/><circle cx="260" cy="120" r="5"/><circle cx="100" cy="320" r="3"/>
+    <circle cx="420" cy="380" r="3"/><circle cx="300" cy="115" r="3"/>
+  </g>
+
+  <!-- diagramme de dualité : Q (E vers E*), X (E* vers F), D (F vers F*), Xt (F* vers E) -->
+  <g stroke="#8DC63F" stroke-width="5" fill="none" marker-end="url(#ar)" stroke-linecap="round">
+    <line x1="200" y1="180" x2="308" y2="180"/>
+    <line x1="350" y1="208" x2="350" y2="318"/>
+    <line x1="318" y1="345" x2="210" y2="345"/>
+    <line x1="168" y1="318" x2="168" y2="208"/>
+  </g>
+
+  <g font-family="DejaVu Serif" fill="#ffffff" text-anchor="middle">
+    <text x="165" y="193" font-size="36">ℝ<tspan font-size="22" font-style="italic" dx="3" dy="-14">p</tspan></text>
+    <text x="358" y="193" font-size="36">ℝ<tspan font-size="22" font-style="italic" dx="3" dy="-14">p*</tspan></text>
+    <text x="358" y="358" font-size="36">ℝ<tspan font-size="22" font-style="italic" dx="3" dy="-14">n</tspan></text>
+    <text x="165" y="358" font-size="36">ℝ<tspan font-size="22" font-style="italic" dx="3" dy="-14">n*</tspan></text>
+  </g>
+
+  <g font-family="DejaVu Serif" font-style="italic" font-weight="bold" fill="#8DC63F" text-anchor="middle" font-size="28">
+    <text x="256" y="165">Q</text>
+    <text x="386" y="273">X</text>
+    <text x="262" y="385">D</text>
+    <text x="128" y="273">X<tspan font-size="18" dy="-12">T</tspan></text>
+  </g>
+
+  <!-- nom -->
+  <text x="260" y="472" font-family="DejaVu Sans Mono" font-weight="bold" font-size="64" fill="#ffffff" text-anchor="middle">pydudi</text>
+  <text x="260" y="508" font-family="DejaVu Sans" font-size="17" fill="#8DC63F" text-anchor="middle" letter-spacing="2">duality diagram</text>
+</svg>
